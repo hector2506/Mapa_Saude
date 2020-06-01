@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load staticfiles%}
+{% block style %}
+<style>
+    #ButtonMapa,
+    #ButtonAgravo,
+    #ButtonPaciente {
+        padding: 10px 20px;
+        font-size: 20px;
+        margin: 5px;
+        min-width: 100px;
+    }
+
+    #ButtonModal {
+        padding: 10px 20px;
+        font-size: 15px;
+        margin: 10px;
+        min-width: 25px;
+    }
+
+    #linkCadastro {
+        color: white;
+    }
+
+    table {
+        background-color: white;
+    }
+</style>
+
+<title>Lista das Notificações</title>
+{% endblock %}
+{% block body %}
+<div align="center">
+    <div class="jumbotron" style="max-width:75%; max-height:75%; margin:50px;">
+        {% if notificacoes %}
+        <div style=" overflow-y : scroll; height: 300px;">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Agravo</th>
+                        <th>Paciente</th>
+                        <th>UBS</th>
+                        <th>Situação Atual</th>
+                        <th>Opções</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in notificacoes %}
+                    <tr>
+                        <td>{{i.agravo}}</td>
+                        <td>{{i.paciente}}</td>
+                        <td>{{i.unidade_saude}}</td>
+                        <td>{{i.situacao_atual}}</td>
+                        <td>
+                            <form action="{% url 'notificacao_list' %}" method="POST">
+                                {% csrf_token %}
+                                <button type="button" class="btn btn-primary" id="notificacao_valor" data-toggle="modal"
+                                    data-target="#notificacao{{i.id}}">Alterar Situação</button>
+                                <div class="modal fade" id="notificacao{{i.id}}">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+
+                                            <!-- Modal Header -->
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Selecione a nova situação da notificação:</h4>
+                                                <button type="button" class="close"
+                                                    data-dismiss="modal">&times;</button>
+                                            </div>
+
+                                            <!-- Modal body -->
+                                            <div class="modal-body">
+
+                                                <select class="form-control" id="situacao_notificacao"
+                                                    name="situacao_notificacao">
+                                                    <option>Notificado</option>
+                                                    <option>Confirmado</option>
+                                                    <option>Alta</option>
+                                                    <option>Óbito</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Modal footer -->
+                                            <div class="modal-footer">
+                                                <div class="btn-group" role="group" aria-label="Basic example"
+                                                    style="margin: 0 auto">
+                                                    <button type="submit" class="btn btn-primary"
+                                                        name="notificacao_valor" id="ButtonModal" value="{{i.id}}">
+                                                        Avançar
+                                                    </button>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <ul class="pagination" style="margin: 10px 0;">
+            {% if notificacoes.has_previous  %}
+            <li class="page-item"><a class="page-link" title="Primeira página" href="?page=1">
+                    <i class="fa fa-fast-backward" style="padding: 2px;"></i></a>
+            </li>
+            <li class="page-item"><a class="page-link" title="Página Anterior"
+                    href="?page={{notificacoes.previous_page_number}}">
+                    <i class="fa fa-backward" style="padding: 2px;"></i></a>
+            </li>
+            {% endif %}
+            {% for i in notificacoes.paginator.page_range %}
+            <li class="page-item {% if notificacoes.number == i %} active {% endif %}"><a class="page-link"
+                    href="?page={{i}}">{{i}}</a></li>
+            {% endfor %}
+            {% if notificacoes.has_next %}
+            <li class="page-item"><a class="page-link" title="Próxima página"
+                    href="?page={{notificacoes.next_page_number}}">
+                    <i class="fa fa-forward" style="padding: 2px;"></i></a>
+            </li>
+            <li class="page-item"><a class="page-link" title="Útima página"
+                    href="?page={{ notificacoes.paginator.num_pages }}">
+                    <i class="fa fa-fast-forward" style="padding: 2px;"></i></a>
+            </li>
+            {% endif %}
+        </ul>
+        {% endif %}
+        <div class="btn-group" style="margin-top: 10px;">
+            <form action="{% url 'novo_notificacao' %}" method="GET">
+                <button type="submit" id="ButtonAgravo" class="btn btn-warning btn-lg">
+                    <div id="linkCadastro">Notificar Agravo</div>
+                </button>
+            </form>
+            <form action="{% url 'home' %}" method="GET">
+                <button type="submit" id="ButtonPaciente" class="btn btn-primary btn-lg">
+                    Pacientes
+                </button>
+            </form>
+            <button type="button" class="btn btn-info btn-lg" id="ButtonMapa" data-toggle="modal"
+                data-target="#modal_mapa">Consultar o Mapa</button>
+            <div class="modal fade" id="modal_mapa">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">Selecione o agravo para ver o mapa:</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <form action="{% url 'mapa' %}" method="POST">
+                            {% csrf_token %}
+                            <!-- Modal body -->
+                            <div class="modal-body">
+
+                                <select class="form-control" id="agravo_notificacao" name="agravo_notificacao">
+                                    {% for j in agravos_mapa %}
+                                    <option>{{j.nome}}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <h5 style="margin-top: 10px;">Consultar o mapa por:</h5>
+                                <div class="form-check-inline">
+                                    <label class="form-check-label" for="escolha">
+                                        <input type="radio" class="form-check-input" id="escolha" name="escolha"
+                                            value="cep_paciente" checked>
+                                        CEP dos pacientes
+                                    </label>
+                                </div>
+                                <div class="form-check-inline">
+                                    <label class="form-check-label" for="escolha">
+                                        <input type="radio" class="form-check-input" id="escolha" name="escolha"
+                                            value="area_ubs">
+                                        Área das UBS
+                                    </label>
+                                </div>
+
+                            </div>
+
+                            <!-- Modal footer -->
+                            <div class="modal-footer">
+                                <div class="btn-group" role="group" aria-label="Basic example" style="margin: 0 auto">
+                                    <button type="submit" class="btn btn-primary" name="notificacao_valor"
+                                        id="ButtonModal" value="">
+                                        Consultar
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+</html>

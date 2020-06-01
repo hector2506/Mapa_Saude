@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block style %}
+<style>
+  #ButtonNotificar {
+    padding: 10px 20px;
+    font-size: 20px;
+    margin: 5px;
+    min-width: 150px;
+  }
+
+  #linkNotificar {
+    color: white;
+  }
+
+  .input-group-prepend {
+    max-width: 100%;
+    min-width: 25%;
+  }
+
+  .input-group-prepend span {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  input,
+  select {
+    min-width: 75%;
+  }
+
+  label {
+    font-weight: bold;
+  }
+
+  .input-group {
+    background-color: white;
+  }
+
+  .input-group-text {
+    background-color: lavender;
+  }
+
+  select[readonly] {
+  background: #eee; 
+  pointer-events: none;
+  touch-action: none;
+  }
+
+</style>
+
+<title>Notificação de Agravo</title>
+{% endblock %}
+{% block body %}
+<div align="center">
+  <div class="jumbotron" style="width:75%; height:75%; margin:50px;">
+    <form action="" method='POST'>
+      {% csrf_token %}
+      <!--Form para notificação-->
+      {{notificacao_form.non_field_errors}}
+
+      {% for field in notificacao_form %}
+
+      <div class="input-group input-group-sm mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text">{{ field.label_tag}}</span>
+        </div>
+        {% if field.name == 'paciente' and paciente_cns %}
+        <select name="paciente" required="" id="id_paciente" readonly="readonly" tabindex="-1" aria-disabled="true">
+          <option value="{{paciente_cns.id}}" selected>{{paciente_cns}}</option>
+        </select>
+        {% else %}
+        {{field}}
+        {% endif %}
+        <!-- Aqui são mensagens de ajuda -->
+        {% if field.help_text %}
+        <small style="color: grey;"> {{ field.help_text }}</small>
+        {% endif %}
+
+        <!-- Aqui são mensagens de Erros -->
+        {% for error in field.errors %}
+        <p><strong>{{ error }}</strong></p>
+        {% endfor %}
+
+        {{ field.errors }}
+
+      </div>
+
+      {% endfor %}
+      <!--Form para notificação-->
+
+      <button type="submit" id="ButtonNotificar" class="btn btn-success btn-lg">
+        Notificar
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

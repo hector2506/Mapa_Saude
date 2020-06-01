@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block style %}
+<style>
+  #ButtonLogin,
+  #ButtonCadastro {
+    padding: 10px 20px;
+    font-size: 20px;
+    margin: 5px;
+    min-width: 150px;
+  }
+
+  #linkCadastro {
+    color: white;
+  }
+
+  .input-group-prepend {
+    max-width: 100%;
+    min-width: 25%;
+  }
+
+  .input-group-prepend span {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  input {
+    min-width: 75%;
+  }
+
+  label {
+    font-weight: bold;
+  }
+
+  .input-group-text {
+    background-color: lavender;
+  }
+</style>
+
+<title>Home</title>
+
+{% endblock %}
+
+{% block body %}
+<img src="{% static 'assets/imagem.png' %}" class="mx-auto d-block img-fluid" style="width:30%; height:30%">
+<div align="center">
+  <div class="jumbotron" style="max-width:30%; max-height:30%">
+    <form action="{% url 'login' %}" method='POST'>
+      {% csrf_token %}
+
+      {{form.non_field_errors}}
+
+      {% for field in form %}
+
+      <div class="input-group input-group-sm mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text">{{ field.label_tag}}</span>
+        </div>
+        {{ field }}
+
+        <!-- Aqui são mensagens de ajuda -->
+        {% if field.help_text %}
+        <small style="color: grey;"> {{ field.help_text }}</small>
+        {% endif %}
+
+        <!-- Aqui são mensagens de Erros -->
+        {% for error in field.errors %}
+        <p><strong>{{ error }}</strong></p>
+        {% endfor %}
+
+        {{ field.errors }}
+
+      </div>
+
+      {% endfor %}
+      <button type="submit" id="ButtonLogin" class="btn btn-primary btn-lg">
+        Entrar
+      </button>
+    </form>
+    <form action="{% url 'register' %}" method='GET'>
+      <button type="submit" id="ButtonCadastro" class="btn btn-success btn-lg">
+        Cadastre-se
+      </button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+</html>
