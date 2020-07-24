@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'core/base.html' %}
 {% block style %}
 <style>
     #map {
@@ -13,7 +13,7 @@
 {% block body %}
 <div align="center">
     <div style="text-align: center;">
-        <form action="{% url 'mapa' %}" method="POST">
+        <form action="{% url 'site_mapa:mapa' %}" method="POST">
             {% csrf_token %}
             <p>
                 <h5>Selecione o agravo:</h5>

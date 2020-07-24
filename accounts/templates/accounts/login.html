@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'core/base.html' %}
 {% load staticfiles %}
 
 {% block style %}
@@ -46,7 +46,7 @@
 <img src="{% static 'assets/imagem.png' %}" class="mx-auto d-block img-fluid" style="width:30%; height:30%">
 <div align="center">
   <div class="jumbotron" style="max-width:30%; max-height:30%">
-    <form action="{% url 'login' %}" method='POST'>
+    <form action="{% url 'accounts:login' %}" method='POST'>
       {% csrf_token %}
 
       {{form.non_field_errors}}
@@ -78,7 +78,7 @@
         Entrar
       </button>
     </form>
-    <form action="{% url 'register' %}" method='GET'>
+    <form action="{% url 'accounts:register' %}" method='GET'>
       <button type="submit" id="ButtonCadastro" class="btn btn-success btn-lg">
         Cadastre-se
       </button>

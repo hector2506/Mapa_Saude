@@ -30,14 +30,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'site_mapa',
-    'multiselectfield'
+    'multiselectfield',
+    'accounts',
+    'core',
+    'notification',
+    'patient'
 ]
 
-AUTH_USER_MODEL = 'site_mapa.User'
+AUTH_USER_MODEL = 'accounts.User'
 
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'login'
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'patient:home'
+LOGOUT_REDIRECT_URL = 'accounts:login'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'core/base.html' %}
 {% load staticfiles%}
 {% block style %}
 <style>
@@ -88,12 +88,12 @@
         </ul>
         {% endif %}
         <div class="btn-group" style="margin-top: 10px;">
-            <form action="{% url 'novo_paciente' %}" method="GET">
+            <form action="{% url 'patient:novo_paciente' %}" method="GET">
                 <button type="submit" id="ButtonPaciente" class="btn btn-primary btn-lg">
                     Cadastrar Paciente
                 </button>
             </form>
-            <form action="{% url 'notificacao_list' %}" method="GET">
+            <form action="{% url 'notification:notificacao_list' %}" method="GET">
                 <button type="submit" id="ButtonAgravo" class="btn btn-warning btn-lg">
                     <div id="linkCadastro">Agravos</div>
                 </button>
@@ -109,7 +109,7 @@
                             <h4 class="modal-title">Selecione o agravo para ver o mapa:</h4>
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
                         </div>
-                        <form action="{% url 'mapa' %}" method="POST">
+                        <form action="{% url 'site_mapa:mapa' %}" method="POST">
                             {% csrf_token %}
 
                             <!-- Modal body -->

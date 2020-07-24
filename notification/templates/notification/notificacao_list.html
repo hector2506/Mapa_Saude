@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'core/base.html' %}
 {% load staticfiles%}
 {% block style %}
 <style>
@@ -52,7 +52,7 @@
                         <td>{{i.unidade_saude}}</td>
                         <td>{{i.situacao_atual}}</td>
                         <td>
-                            <form action="{% url 'notificacao_list' %}" method="POST">
+                            <form action="{% url 'notification:notificacao_list' %}" method="POST">
                                 {% csrf_token %}
                                 <button type="button" class="btn btn-primary" id="notificacao_valor" data-toggle="modal"
                                     data-target="#notificacao{{i.id}}">Alterar Situação</button>
@@ -128,12 +128,12 @@
         </ul>
         {% endif %}
         <div class="btn-group" style="margin-top: 10px;">
-            <form action="{% url 'novo_notificacao' %}" method="GET">
+            <form action="{% url 'notification:novo_notificacao' %}" method="GET">
                 <button type="submit" id="ButtonAgravo" class="btn btn-warning btn-lg">
                     <div id="linkCadastro">Notificar Agravo</div>
                 </button>
             </form>
-            <form action="{% url 'home' %}" method="GET">
+            <form action="{% url 'patient:home' %}" method="GET">
                 <button type="submit" id="ButtonPaciente" class="btn btn-primary btn-lg">
                     Pacientes
                 </button>
@@ -149,7 +149,7 @@
                             <h4 class="modal-title">Selecione o agravo para ver o mapa:</h4>
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
                         </div>
-                        <form action="{% url 'mapa' %}" method="POST">
+                        <form action="{% url 'site_mapa:mapa' %}" method="POST">
                             {% csrf_token %}
                             <!-- Modal body -->
                             <div class="modal-body">
