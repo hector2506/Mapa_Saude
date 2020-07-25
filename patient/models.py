@@ -34,6 +34,7 @@ class Paciente(models.Model):
     gestacao = models.CharField(max_length=25, choices=gestacao, default="9")
     uf = models.CharField(max_length=25, choices=uf, default="PI")
     municipio = models.CharField(max_length=25, default=None)
-    cep = models.CharField(max_length=8,default=None)
+    latitude = models.CharField(max_length=255,null=True,blank=True, default=None)
+    longitude = models.CharField(max_length=255,null=True,blank=True, default=None)
     def __str__(self):
         return self.nome

@@ -1,57 +1,70 @@
 {% extends 'core/base.html' %}
 {% block style %}
-<style>
-  #ButtonNotificar {
-    padding: 10px 20px;
-    font-size: 20px;
-    margin: 5px;
-    min-width: 150px;
-  }
+#ButtonNotificar {
+padding: 10px 20px;
+font-size: 20px;
+margin: 5px;
+min-width: 150px;
+}
 
-  #linkNotificar {
-    color: white;
-  }
+#linkNotificar {
+color: white;
+}
 
-  .input-group-prepend {
-    max-width: 100%;
-    min-width: 25%;
-  }
+.input-group-prepend {
+max-width: 100%;
+min-width: 25%;
+}
 
-  .input-group-prepend span {
-    width: 100%;
-    overflow: hidden;
-  }
+.input-group-prepend span {
+width: 100%;
+overflow: hidden;
+}
 
-  input,
-  select {
-    min-width: 75%;
-  }
+input,
+select {
+min-width: 75%;
 
-  label {
-    font-weight: bold;
-  }
+}
 
-  .input-group {
-    background-color: white;
-  }
+label {
+font-weight: bold;
+}
 
-  .input-group-text {
-    background-color: lavender;
-  }
+.input-group {
+background-color: white;
+}
 
-  select[readonly] {
-  background: #eee; 
-  pointer-events: none;
-  touch-action: none;
-  }
+.input-group-text {
+background-color: lavender;
+}
 
-</style>
+select[readonly] {
+background: #eee;
+pointer-events: none;
+touch-action: none;
+}
+{% endblock %}
 
+{% block title %}
 <title>Notificação de Agravo</title>
 {% endblock %}
+
+{% block navbar %}
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'patient:home' %}">Home</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'notification:notificacao_list' %}">Notificações</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'site_mapa:mapa' %}">Consultar o Mapa</a>
+</li>
+{% endblock %}
+
 {% block body %}
-<div align="center">
-  <div class="jumbotron" style="width:75%; height:75%; margin:50px;">
+<div style="text-align: center;">
+  <div class="jumbotron mx-auto" style="width:75%; height:75%; margin:50px;">
     <form action="" method='POST'>
       {% csrf_token %}
       <!--Form para notificação-->
@@ -68,7 +81,19 @@
           <option value="{{paciente_cns.id}}" selected>{{paciente_cns}}</option>
         </select>
         {% else %}
+        {% if field.name == 'unidade_saude' %}
+        <select name="unidade_saude" required="" id="id_unidade_saude">
+          {% for i in lista_ubs %}
+          {% if i == user.vinculo %}
+          <option value="{{i.id}}" selected>{{i}}</option>
+          {% else %}
+          <option value="{{i.id}}">{{i}}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+        {% else %}
         {{field}}
+        {% endif %}
         {% endif %}
         <!-- Aqui são mensagens de ajuda -->
         {% if field.help_text %}

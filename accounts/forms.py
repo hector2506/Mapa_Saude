@@ -30,6 +30,9 @@ class UserRegisterForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['cpf', 'nome', 'categoria', 'vinculo']
+        labels = {
+            'vinculo': "Vínculo"
+        }
     
     def clean(self, *args, **kwargs):
         cpf = self.cleaned_data['cpf']

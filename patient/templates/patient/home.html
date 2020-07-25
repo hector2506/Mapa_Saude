@@ -1,30 +1,44 @@
 {% extends 'core/base.html' %}
 {% load staticfiles%}
+
 {% block style %}
-<style>
-    #ButtonMapa,
-    #ButtonAgravo,
-    #ButtonPaciente {
-        padding: 10px 20px;
-        font-size: 20px;
-        margin: 5px;
-        min-width: 100px;
-    }
+#ButtonMapa,
+#ButtonAgravo,
+#ButtonPaciente {
+padding: 10px 20px;
+font-size: 20px;
+margin: 5px;
+min-width: 100px;
+}
 
-    #linkCadastro {
-        color: white;
-    }
+#linkCadastro {
+color: white;
+}
 
-    table {
-        background-color: white;
-    }
-</style>
+table {
+background-color: white;
+}
+{% endblock %}
 
+{% block title %}
 <title>Lista dos Pacientes da UBS</title>
 {% endblock %}
+
+{% block navbar %}
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'patient:home' %}">Home</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'notification:notificacao_list' %}">Notificações</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'site_mapa:mapa' %}">Consultar o Mapa</a>
+</li>
+{% endblock %}
+
 {% block body %}
-<div align="center">
-    <div class="jumbotron" style="max-width:75%; max-height:75%; margin:50px;">
+<div style="text-align: center;">
+    <div class="jumbotron mx-auto" style="max-width:75%; max-height:75%; margin:50px;">
         {% if pacientes %}
         <div style=" overflow-y : scroll; height: 300px;">
             <table class="table table-bordered">
@@ -33,7 +47,6 @@
                         <th>Paciente</th>
                         <th>CNS</th>
                         <th>Sexo</th>
-                        <th>CEP</th>
                         <th>Data de nascimento</th>
                         <th>Ocupação</th>
                         <th>UF</th>
@@ -46,7 +59,6 @@
                         <td>{{i.nome}}</td>
                         <td>{{i.cns}}</td>
                         <td>{{i.sexo}}</td>
-                        <td>{{i.cep}}</td>
                         <td>{{i.data_nascimento}}</td>
                         <td>{{i.ocupacao}}</td>
                         <td>{{i.uf}}</td>
@@ -95,7 +107,7 @@
             </form>
             <form action="{% url 'notification:notificacao_list' %}" method="GET">
                 <button type="submit" id="ButtonAgravo" class="btn btn-warning btn-lg">
-                    <div id="linkCadastro">Agravos</div>
+                    <div id="linkCadastro">Notificações</div>
                 </button>
             </form>
             <button type="button" class="btn btn-info btn-lg" id="ButtonMapa" data-toggle="modal"
@@ -114,32 +126,16 @@
 
                             <!-- Modal body -->
                             <div class="modal-body">
-
                                 <select class="form-control" id="agravo_notificacao" name="agravo_notificacao">
                                     {% for j in agravos_mapa %}
                                     <option>{{j.nome}}</option>
                                     {% endfor %}
                                 </select>
-
-                                <h5 style="margin-top: 10px;">Consultar o mapa por:</h5>
-                                <div class="form-check-inline">
-                                    <label class="form-check-label" for="escolha">
-                                        <input type="radio" class="form-check-input" id="escolha" name="escolha"
-                                            value="cep_paciente" checked>CEP dos pacientes
-                                    </label>
-                                </div>
-                                <div class="form-check-inline">
-                                    <label class="form-check-label" for="escolha">
-                                        <input type="radio" class="form-check-input" id="escolha" name="escolha"
-                                            value="area_ubs">Área das UBS
-                                    </label>
-                                </div>
-
                             </div>
 
                             <!-- Modal footer -->
                             <div class="modal-footer">
-                                <div class="btn-group" role="group" aria-label="Basic example" style="margin: 0 auto">
+                                <div class="btn-group" role="group" style="margin: 0 auto">
                                     <button type="submit" class="btn btn-primary" name="notificacao_valor"
                                         id="ButtonModal" value="">
                                         Consultar

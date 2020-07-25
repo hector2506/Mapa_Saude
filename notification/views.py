@@ -28,7 +28,7 @@ def notificacao_list(request):
         notificacao = get_object_or_404(Notificacao, id=request.POST['notificacao_valor'])
         notificacao.situacao_atual = request.POST['situacao_notificacao']
         notificacao.save()
-    notificacoes = gerenciar_paginacao(request, Notificacao.objects.filter(usuario=request.user))
+    notificacoes = gerenciar_paginacao(request, Notificacao.objects.filter(usuario=request.user).order_by('agravo'))
     lista_notificacoes = Notificacao.objects.all()
     if (notificacoes):
         agravos_mapa = []
@@ -74,14 +74,17 @@ def novo_notificacao(request):
                     request, f'{user.nome}, notificação realizada com sucesso!')
                 return redirect('notification:notificacao_list')
     else:
-        notificacao_form = NotificacaoForm()
+        notificacao_form = NotificacaoForm()  
+        lista_ubs = Estabelecimento.objects.all()
     if(request.session.get('paciente_cns')):
         context = {
             'notificacao_form': notificacao_form,
-            'paciente_cns': get_object_or_404(Paciente, cns=request.session.get('paciente_cns'))
+            'paciente_cns': get_object_or_404(Paciente, cns=request.session.get('paciente_cns')),
+            'lista_ubs': lista_ubs
         }
     else:
         context = {
             'notificacao_form': notificacao_form,
+            'lista_ubs': lista_ubs
         }
     return render(request, 'notification/novo_notificacao.html', context)

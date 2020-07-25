@@ -13,10 +13,10 @@ def mapa(request):
     env = os.environ
     GOOGLE_API_KEY = env.get('GOOGLE_API_KEY')
     nome_agravo = request.POST['agravo_notificacao']
-    escolha_notificacao = request.POST.getlist('escolha')
     agravo_notificacao = get_object_or_404(Agravo, nome=nome_agravo)
     notificacoes_mapa = Notificacao.objects.filter(agravo=agravo_notificacao)
     lista_notificacoes = get_list_or_404(Notificacao)
+    ubs_mapa = get_list_or_404(Estabelecimento)
     flag_agravo = True
     agravos_mapa = []
     for i in lista_notificacoes:
@@ -28,8 +28,8 @@ def mapa(request):
         flag_agravo = True
     context = {
         'notificacoes_mapa': notificacoes_mapa,
+        'ubs_mapa': ubs_mapa,
         'agravos_mapa': agravos_mapa,
-        'escolha_notificacao': escolha_notificacao,
         'google_api_key': GOOGLE_API_KEY
     }
     return render(request, 'site_mapa/mapa.html', context)

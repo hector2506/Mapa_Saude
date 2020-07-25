@@ -8,6 +8,7 @@ from .forms import *
 from notification.models import *
 import os
 
+
 def gerenciar_paginacao(request, object_list):
     paginator = Paginator(object_list, 5)
     try:
@@ -22,9 +23,11 @@ def gerenciar_paginacao(request, object_list):
         current_page = paginator.page(paginator.num_pages)
     return current_page
 
+
 @login_required
 def paciente_list(request):
-    pacientes = gerenciar_paginacao(request, Paciente.objects.filter(ubs=request.user.vinculo))
+    pacientes = gerenciar_paginacao(request, Paciente.objects.filter(
+        ubs=request.user.vinculo).order_by('nome'))
     lista_notificacoes = Notificacao.objects.all()
     if (pacientes):
         agravos_mapa = []
@@ -45,6 +48,7 @@ def paciente_list(request):
         context = {}
     return render(request, "patient/home.html", context)
 
+
 @login_required
 def novo_paciente(request):
     if request.method == 'POST':
@@ -60,7 +64,12 @@ def novo_paciente(request):
             return redirect('notification:novo_notificacao')
     else:
         form = PacienteRegisterForm()
+    ubs_mapa = get_list_or_404(Estabelecimento)
+    env = os.environ
+    GOOGLE_API_KEY = env.get('GOOGLE_API_KEY')
     context = {
+        'ubs_mapa': ubs_mapa,
+        'google_api_key': GOOGLE_API_KEY,
         'form': form
     }
     return render(request, 'patient/novo_paciente.html', context)

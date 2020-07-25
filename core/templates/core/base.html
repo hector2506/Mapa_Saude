@@ -22,42 +22,81 @@
   <!-- Icons -->
   <script src="https://use.fontawesome.com/be0366e24b.js"></script>
 
-  {% block style %}
+  <style>
+    html {
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    body {
+      position: relative;
+      margin: 0;
+      padding-bottom: 6rem;
+      min-height: 100%;
+    }
+
+    footer {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background-color: whitesmoke;
+      color: white;
+      text-align: center;
+    }
+
+      {% block style %}
+
+      {% endblock %}
+  </style>
+  {% block title %}
   {% endblock %}
 </head>
 
 <body>
   <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
     {% if user.is_authenticated %}
-    <a class="navbar-brand" href="{% url 'patient:home' %}">Mapa da Saúde</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler"
-      aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarToggler">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'patient:home' %}">
-            <i class="fa fa-user" aria-hidden="true"></i> {{user.nome}}
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'accounts:logout' %}">
-            <i class="fa fa-sign-out" aria-hidden="true"></i>Sair
-          </a>
-        </li>
-      </ul>
-    </div>
-    {% else %}
-    <a class="navbar-brand" href="{% url 'accounts:login' %}">Mapa da Saúde</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler"
-      aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    {% endif %}
+  <a class="navbar-brand" href="{% url 'patient:home' %}">
+    <img src="{% static 'assets/logotipo.png' %}" width="35" height="35" class="d-inline-block align-top" alt="">
+    Mapa da Saúde
+  </a>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      {% block navbar %}
+      {% endblock %}
+    </ul>
+  </div>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler"
+    aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarToggler">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'patient:home' %}">
+          <i class="fa fa-user" aria-hidden="true"></i> {{user.nome}}
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'accounts:logout' %}">
+          <i class="fa fa-sign-out" aria-hidden="true"></i>Sair
+        </a>
+      </li>
+    </ul>
+  </div>
+  {% else %}
+  <a class="navbar-brand" href="{% url 'accounts:login' %}">
+    <img src="{% static 'assets/logotipo.png' %}" width="35" height="35" class="d-inline-block align-top" alt="">
+    Mapa da Saúde
+  </a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler"
+    aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  {% endif %}
   </nav>
   {% if messages %}
-  <div align='center'>
+  <div style="text-align: center;">
     {% for message in messages %}
     <div class="alert alert-{{ message.tags }}">
       {{ message }}
@@ -67,6 +106,9 @@
   {% endif %}
   {% block body%}
   {% endblock %}
-</body>
+  <footer>
+    <img src="{% static 'assets/imagem.png' %}" class="mx-auto d-block img-fluid" style="width:10%; height:10%">
+  </footer>
+  </body>
 
 </html>

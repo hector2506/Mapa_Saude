@@ -1,46 +1,134 @@
 {% extends 'core/base.html' %}
+
 {% block style %}
-<style>
-  #ButtonCadastro {
-    padding: 10px 20px;
-    font-size: 20px;
-    margin: 5px;
-    min-width: 150px;
-  }
+button {
+padding: 10px 20px;
+font-size: 20px;
+margin: 5px;
+min-width: 150px;
+}
 
-  #linkCadastro {
-    color: white;
-  }
+#linkCadastro {
+color: white;
+}
 
-  .input-group-prepend {
-    max-width: 100%;
-    min-width: 25%;
-  }
+.input-group-prepend {
+max-width: 100%;
+min-width: 25%;
+}
 
-  .input-group-prepend span {
-    width: 100%;
-    overflow: hidden;
-  }
+.input-group-prepend span {
+width: 100%;
+overflow: hidden;
+}
 
-  input,
-  select {
-    min-width: 75%;
-  }
+input,
+select {
+min-width: 75%;
+}
 
-  label {
-    font-weight: bold;
-  }
+label {
+font-weight: bold;
+}
 
-  .input-group-text {
-    background-color: lavender;
-  }
-</style>
+.input-group-text {
+background-color: lavender;
+}
 
+#map {
+height: 90%;
+border: 1px solid black;
+}
+
+/* Optional: Makes the sample page fill the window. */
+html,
+body {
+height: 100%;
+padding: 0;
+}
+
+#description {
+font-family: Roboto;
+font-size: 15px;
+font-weight: 300;
+}
+
+#infowindow-content .title {
+font-weight: bold;
+}
+
+#infowindow-content {
+display: none;
+}
+
+#map #infowindow-content {
+display: inline;
+}
+
+.pac-card {
+margin: 10px 10px 0 0;
+border-radius: 2px 0 0 2px;
+box-sizing: border-box;
+-moz-box-sizing: border-box;
+outline: none;
+box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+background-color: #fff;
+font-family: Roboto;
+}
+
+#pac-container {
+padding-bottom: 12px;
+margin-right: 12px;
+}
+
+#input_map {
+background-color: #fff;
+font-family: Roboto;
+font-size: 15px;
+font-weight: 300;
+margin-top: 12px;
+margin-left: 12px;
+padding: 0 11px 0 13px;
+text-overflow: ellipsis;
+width: 400px;
+}
+
+#input_map:focus {
+border-color: #4d90fe;
+}
+
+#title {
+color: #fff;
+background-color: #4d90fe;
+font-size: 25px;
+font-weight: 500;
+padding: 6px 12px;
+}
+
+.span-button {
+margin
+}
+{% endblock %}
+
+{% block title %}
 <title>Cadastro de Paciente</title>
 {% endblock %}
+
+{% block navbar %}
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'patient:home' %}">Home</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'notification:notificacao_list' %}">Notificações</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'site_mapa:mapa' %}">Consultar o Mapa</a>
+</li>
+{% endblock %}
+
 {% block body %}
-<div align="center">
-  <div class="jumbotron" style="width:75%; height:75%; margin:50px;">
+<div id="1">
+  <div class="jumbotron mx-auto" style="width:75%; height:75%; margin:50px;">
     <form action="" method='POST'>
       {% csrf_token %}
       <form action="" method='POST'>
@@ -51,6 +139,9 @@
         {% for field in form %}
 
         <div class="input-group input-group-sm mb-3">
+
+          {% if 'latitude' not in field.label_tag %}
+          {% if 'longitude' not in field.label_tag %}
           <div class="input-group-prepend">
             <span class="input-group-text">{{ field.label_tag}}</span>
           </div>
@@ -68,13 +159,225 @@
 
           {{ field.errors }}
 
+          {% endif %}
+          {% endif %}
         </div>
 
         {% endfor %}
-        <button type="submit" id="ButtonCadastro" class="btn btn-success btn-lg">
-          Avançar
+        {{form.latitude}}
+        {{form.longitude}}
+        <button type="submit" id="ButtonCadastro" class="btn btn-success btn-lg d-inline float-right"
+          style="visibility:hidden">
+          Finalizar
         </button>
       </form>
+      <button type="submit" class="btn btn-primary btn-lg d-inline float-left" onclick="proximo()">
+        Avançar
+      </button>
   </div>
 </div>
+
+<div class="jumbotron mx-auto d-none" id="2" style="width:75%; height:75%; margin:50px;">
+
+  <div class="pac-card" id="pac-card">
+    <div>
+      <div id="title">
+        Busca por endereço
+      </div>
+    </div>
+    <div id="pac-container">
+      <input id="input_map" type="text" placeholder="Digite seu endereço">
+    </div>
+  </div>
+
+  <div id="map"></div>
+  <div id="infowindow-content">
+    <img src="" width="16" height="16" id="place-icon">
+    <span id="place-name" class="title"></span><br>
+    <span id="place-address"></span>
+  </div>
+  <button onclick="anterior()" class="btn btn-primary btn-lg float-left" style="margin-top: 2em;">
+    Anterior
+  </button>
+  <button onclick="finalizar()" id="finalizar" class="btn btn-success btn-lg float-right" style="margin-top: 2em;">
+    Finalizar
+  </button>
+</div>
+
+<script>
+
+  var map;
+  var service;
+  var infowindow;
+  var marker;
+  var coordenadas;
+
+  function initMap() {
+    var map = new google.maps.Map(document.getElementById('map'), {
+      center: {
+        lat: -5.0364390,
+        lng: -42.822612
+      },
+      zoom: 14,
+      mapTypeId: 'roadmap'
+    });
+
+    var card = document.getElementById('pac-card');
+    var input = document.getElementById('input_map');
+
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(card);
+
+    var options = {
+      componentRestrictions: { country: 'br' }
+    };
+
+    var autocomplete = new google.maps.places.Autocomplete(input, options);
+    // Set the data fields to return when the user selects a place.
+    autocomplete.setFields(
+      ['address_components', 'geometry', 'icon', 'name']);
+
+    // Delimitar as áreas das UBS no mapa
+    let ubsCoordenadas = []
+    {% for g in ubs_mapa %}
+    ubsCoordenadas.push("{{g.coordenadas}}")
+    {% endfor %}
+    for (let i in ubsCoordenadas) {
+      var ubs_poligono = criaPoligono(buildCoordinatesArrayFromString(ubsCoordenadas[i]), '#00cc00')
+      ubs_poligono.setMap(map);
+      ubs_poligono.addListener('click', function (e) {
+        placeMarkerAndPanTo(e.latLng, map)
+        $("#id_latitude").val(e.latLng.lat());
+        $("#id_longitude").val(e.latLng.lng());
+      });
+    }
+
+    var infowindow = new google.maps.InfoWindow();
+    var infowindowContent = document.getElementById('infowindow-content');
+    infowindow.setContent(infowindowContent);
+    var marker = new google.maps.Marker({
+      map: map,
+      anchorPoint: new google.maps.Point(0, -29)
+    });
+
+    map.addListener('click', function (e) {
+      placeMarkerAndPanTo(e.latLng, map)
+      $("#id_latitude").val(e.latLng.lat());
+      $("#id_longitude").val(e.latLng.lng());
+    });
+
+    function placeMarkerAndPanTo(latLng, map) {
+      if (marker && marker.setMap) {
+        marker.setMap(null);
+      }
+      marker = new google.maps.Marker({
+        position: latLng,
+        map: map
+      });
+      document.getElementById('finalizar').disabled = false
+      map.panTo(latLng);
+    }
+
+    autocomplete.addListener('place_changed', function () {
+      infowindow.close();
+      marker.setVisible(false);
+      var place = autocomplete.getPlace();
+      if (!place.geometry) {
+        // User entered the name of a Place that was not suggested and
+        // pressed the Enter key, or the Place Details request failed.
+        window.alert("No details available for input: '" + place.name + "'");
+        return;
+      }
+
+      // If the place has a geometry, then present it on a map.
+      if (place.geometry.viewport) {
+        map.fitBounds(place.geometry.viewport);
+      } else {
+        map.setCenter(place.geometry.location);
+        map.setZoom(11);  // Why 11? Because it looks good.
+      }
+
+      $("#id_latitude").val(place.geometry.location.lat());
+      $("#id_longitude").val(place.geometry.location.lng());
+      document.getElementById('finalizar').disabled = false
+
+      marker.setPosition(place.geometry.location);
+      marker.setVisible(true);
+
+      var address = '';
+      if (place.address_components) {
+        address = [
+          (place.address_components[0] && place.address_components[0].short_name || ''),
+          (place.address_components[1] && place.address_components[1].short_name || ''),
+          (place.address_components[2] && place.address_components[2].short_name || '')
+        ].join(' ');
+      }
+
+      infowindowContent.children['place-icon'].src = place.icon;
+      infowindowContent.children['place-name'].textContent = place.name;
+      infowindowContent.children['place-address'].textContent = address;
+      infowindow.open(map, marker);
+    });
+
+  }
+
+  // Função que monta um array com longitude e latitude com base numa string com as coordenadas
+  function buildCoordinatesArrayFromString(CoordenadasString) {
+    var finalData = []; // Array com latitude e longitude 
+    var grouped = CoordenadasString.split("                 "); // Cria um array de substrings divididas a partir do espaço usando a função split()
+
+    // Função que é responsável por separar a latitude e a longitude e depois depositar cada instância no array finalData
+    grouped.forEach(function (item, i) { // percorre cada elemento do array grouped usando o forEach
+      let a = item.trim().split(','); // trim() serve para elimitar os espaços e o split serve para criar um array de substrings divididas a partir da vírgula, separando lat e lng
+      // coloca o novo elemento com lgn e lat no array de coordenadas
+      finalData.push({
+        lng: parseFloat(a[0]),
+        lat: parseFloat(a[1])
+      });
+    });
+
+    // Retorna o array com todas as coordenadas devidamente organizadas
+    return finalData;
+  }
+
+  function criaPoligono(path, cor) {
+    var ubs_poligono = new google.maps.Polygon({
+      paths: path,
+      strokeColor: cor,
+      strokeOpacity: 1.5,
+      strokeWeight: 2,
+      fillOpacity: 0
+    });
+    return ubs_poligono
+  }
+
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_api_key }}&libraries=places&callback=initMap" async
+  defer></script>
+
+<script>
+  document.getElementById('finalizar').disabled = true
+  if ($("#id_longitude").val() != "") {
+    document.getElementById('ButtonCadastro').disabled = false
+  }
+  function proximo() {
+    document.getElementById('1').className = "d-none"
+    document.getElementById('2').className = "jumbotron mx-auto"
+  }
+
+  function anterior() {
+    document.getElementById('1').className = ""
+    document.getElementById('2').className = "d-none"
+    if ($("#id_longitude").val() != "") {
+      document.getElementById("ButtonCadastro").style.visibility = "visible"
+    }
+  }
+
+  function finalizar() {
+    anterior()
+    document.getElementById("ButtonCadastro").disabled = false
+    document.getElementById("ButtonCadastro").click()
+  }
+
+</script>
 {% endblock %}
