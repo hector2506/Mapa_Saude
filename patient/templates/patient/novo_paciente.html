@@ -1,7 +1,10 @@
 {% extends 'core/base.html' %}
 
 {% block style %}
-button {
+#ButtonFinalizar,
+#finalizar,
+#ButtonProximo,
+#ButtonAnterior {
 padding: 10px 20px;
 font-size: 20px;
 margin: 5px;
@@ -121,9 +124,9 @@ margin
 <li class="nav-item">
   <a class="nav-link" href="{% url 'notification:notificacao_list' %}">Notificações</a>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="{% url 'site_mapa:mapa' %}">Consultar o Mapa</a>
-</li>
+{% endblock %}
+{% block mapa_active %}
+class="nav-item"
 {% endblock %}
 
 {% block body %}
@@ -166,12 +169,12 @@ margin
         {% endfor %}
         {{form.latitude}}
         {{form.longitude}}
-        <button type="submit" id="ButtonCadastro" class="btn btn-success btn-lg d-inline float-right"
+        <button type="submit" id="ButtonFinalizar" class="btn btn-success btn-lg d-inline float-right"
           style="visibility:hidden">
           Finalizar
         </button>
       </form>
-      <button type="submit" class="btn btn-primary btn-lg d-inline float-left" onclick="proximo()">
+      <button type="submit" class="btn btn-primary btn-lg d-inline float-left" onclick="proximo()" id="ButtonProximo">
         Avançar
       </button>
   </div>
@@ -196,7 +199,7 @@ margin
     <span id="place-name" class="title"></span><br>
     <span id="place-address"></span>
   </div>
-  <button onclick="anterior()" class="btn btn-primary btn-lg float-left" style="margin-top: 2em;">
+  <button onclick="anterior()" class="btn btn-primary btn-lg float-left" style="margin-top: 2em;" id="ButtonAnterior">
     Anterior
   </button>
   <button onclick="finalizar()" id="finalizar" class="btn btn-success btn-lg float-right" style="margin-top: 2em;">
@@ -219,7 +222,13 @@ margin
         lng: -42.822612
       },
       zoom: 14,
-      mapTypeId: 'roadmap'
+      mapTypeId: 'roadmap',
+      zoomControl: false,
+      mapTypeControl: false,
+      scaleControl: false,
+      streetViewControl: false,
+      rotateControl: false,
+      fullscreenControl: false
     });
 
     var card = document.getElementById('pac-card');
@@ -358,7 +367,7 @@ margin
 <script>
   document.getElementById('finalizar').disabled = true
   if ($("#id_longitude").val() != "") {
-    document.getElementById('ButtonCadastro').disabled = false
+    document.getElementById('ButtonFinalizar').disabled = false
   }
   function proximo() {
     document.getElementById('1').className = "d-none"
@@ -369,14 +378,14 @@ margin
     document.getElementById('1').className = ""
     document.getElementById('2').className = "d-none"
     if ($("#id_longitude").val() != "") {
-      document.getElementById("ButtonCadastro").style.visibility = "visible"
+      document.getElementById("ButtonFinalizar").style.visibility = "visible"
     }
   }
 
   function finalizar() {
     anterior()
-    document.getElementById("ButtonCadastro").disabled = false
-    document.getElementById("ButtonCadastro").click()
+    document.getElementById("ButtonFinalizar").disabled = false
+    document.getElementById("ButtonFinalizar").click()
   }
 
 </script>
