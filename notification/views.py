@@ -75,16 +75,28 @@ def novo_notificacao(request):
                 return redirect('notification:notificacao_list')
     else:
         notificacao_form = NotificacaoForm()  
-        lista_ubs = Estabelecimento.objects.all()
+    lista_ubs = Estabelecimento.objects.all()
+    lista_notificacoes = get_list_or_404(Notificacao)
+    flag_agravo = True
+    agravos_mapa = []
+    for i in lista_notificacoes:
+        for j in agravos_mapa:
+            if j == i.agravo:
+                flag_agravo = False
+        if flag_agravo:
+            agravos_mapa.append(i.agravo)
+        flag_agravo = True
     if(request.session.get('paciente_cns')):
         context = {
             'notificacao_form': notificacao_form,
             'paciente_cns': get_object_or_404(Paciente, cns=request.session.get('paciente_cns')),
-            'lista_ubs': lista_ubs
+            'lista_ubs': lista_ubs,
+            'agravos_mapa': agravos_mapa,
         }
     else:
         context = {
             'notificacao_form': notificacao_form,
-            'lista_ubs': lista_ubs
+            'lista_ubs': lista_ubs,
+            'agravos_mapa': agravos_mapa,
         }
     return render(request, 'notification/novo_notificacao.html', context)

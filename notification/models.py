@@ -16,23 +16,24 @@ class Notificacao(models.Model):
                (2, 'Mialgia'),
                (3, 'Cefaleia'),
                (4, 'Exantema'),
-               (5, 'Vomito'),
-               (6, 'Nauseas'),
-               (7, 'Dor Nas Costas'),
+               (5, 'Vômito'),
+               (6, 'Náuseas'),
+               (7, 'Dor nas costas'),
                (8, 'Conjuntivite'),
                (9, 'Artrite'),
-               (10, 'Artralgia Intensa'),
-               (11, 'Petequias'),
+               (10, 'Artralgia intensa'),
+               (11, 'Petéquias'),
                (12, 'Leucopenia'),
-               (13, 'Prova do Laço Positiva'),
-               (14, 'Dor Retroorbital'))
+               (13, 'Prova do laço positiva'),
+               (14, 'Dor retroorbital'))
                
     DOENCAS_PRE_EXISTENTES = ((1, 'Diabetes'),
-               (2, 'Doencas Hematologicas'),
+               (2, 'Doencas hematológicas'),
                (3, 'Hepatopatias'),
-               (4, 'Doenca Renal Cronica'),
-               (5, 'Hipertensao Arterial'),
-               (6, 'Doenca Acido Peptica'))
+               (4, 'Doença renal crônica'),
+               (5, 'Hipertensão arterial'),
+               (6, 'Doença ácido-péptica'),
+               (7, 'Doenças auto-imunes'))
 
     situacao = [
         ("Notificado", "Notificado"),

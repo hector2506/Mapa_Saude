@@ -65,11 +65,22 @@ def novo_paciente(request):
     else:
         form = PacienteRegisterForm()
     ubs_mapa = get_list_or_404(Estabelecimento)
+    lista_notificacoes = get_list_or_404(Notificacao)
+    flag_agravo = True
+    agravos_mapa = []
+    for i in lista_notificacoes:
+        for j in agravos_mapa:
+            if j == i.agravo:
+                flag_agravo = False
+        if flag_agravo:
+            agravos_mapa.append(i.agravo)
+        flag_agravo = True
     env = os.environ
     GOOGLE_API_KEY = env.get('GOOGLE_API_KEY')
     context = {
         'ubs_mapa': ubs_mapa,
+        'agravos_mapa': agravos_mapa,
         'google_api_key': GOOGLE_API_KEY,
-        'form': form
+        'form': form,
     }
     return render(request, 'patient/novo_paciente.html', context)

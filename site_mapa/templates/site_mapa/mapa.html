@@ -8,7 +8,7 @@ height: 100%;
 #map {
 width: 75%;
 height: 65%;
-margin: 1%;
+margin: 5%;
 }
 
 .box {
@@ -50,25 +50,28 @@ background-color: #800080;
 <li class="nav-item">
     <a class="nav-link" href="{% url 'notification:notificacao_list' %}">Notificações</a>
 </li>
-<li class="nav-item active">
-    <a class="nav-link" href="{% url 'site_mapa:mapa' %}">Consultar o Mapa</a>
-</li>
+{% endblock %}
+{% block mapa_active %}
+class="nav-item active"
 {% endblock %}
 
 {% block body %}
-<div style="text-align: center;">
-    <form action="{% url 'site_mapa:mapa' %}" method="POST">
+<div id="selecaoagravo" style="text-align: left;">
+    <form class="form-inline" action="{% url 'site_mapa:mapa' %}" method="POST">
         {% csrf_token %}
-        <h5>Selecione o agravo:</h5>
         <select class="form-control" id="agravo_notificacao" name="agravo_notificacao"
-            style="width: auto; min-width: 500px; margin: 0 auto; margin-top: 10px;">
+            style="min-width: 150px; display: inline-block;">
             {% for j in agravos_mapa %}
+            {% if j.nome == nome_agravo %}
+            <option selected>{{j.nome}}</option>
+            {% else %}
             <option>{{j.nome}}</option>
+            {% endif %}
             {% endfor %}
         </select>
         <button type="submit" class="btn btn-primary" name="notificacao_valor" id="ButtonModal"
-            style="margin-top: 10px;">
-            Consultar
+            style="display: inline-block;">
+            Recarregar
         </button>
     </form>
 </div>
@@ -111,9 +114,16 @@ background-color: #800080;
                 lng: -42.822612
             },
             zoom: 11,
-            mapTypeId: 'roadmap'
+            mapTypeId: 'roadmap',
+            zoomControl: true,
+            mapTypeControl: false,
+            scaleControl: false,
+            streetViewControl: false,
+            rotateControl: false,
+            fullscreenControl: true
         });
         map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('helptext'));
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(document.getElementById('selecaoagravo'));
         var infowindow = new google.maps.InfoWindow(); //Cria a janela de informação usada para a área da ubs
         let coordenadasNotificacoes = [] //Array para receber as coordenadas de todas as notificações
         let latitudeNotificacoes = [] // array que recebe a latitude das notificações

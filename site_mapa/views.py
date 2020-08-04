@@ -27,6 +27,7 @@ def mapa(request):
             agravos_mapa.append(i.agravo)
         flag_agravo = True
     context = {
+        'nome_agravo': nome_agravo,
         'notificacoes_mapa': notificacoes_mapa,
         'ubs_mapa': ubs_mapa,
         'agravos_mapa': agravos_mapa,

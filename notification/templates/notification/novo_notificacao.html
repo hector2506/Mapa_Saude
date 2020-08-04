@@ -24,7 +24,6 @@ overflow: hidden;
 input,
 select {
 min-width: 75%;
-
 }
 
 label {
@@ -57,9 +56,9 @@ touch-action: none;
 <li class="nav-item">
   <a class="nav-link" href="{% url 'notification:notificacao_list' %}">Notificações</a>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="{% url 'site_mapa:mapa' %}">Consultar o Mapa</a>
-</li>
+{% endblock %}
+{% block mapa_active %}
+class="nav-item"
 {% endblock %}
 
 {% block body %}
