@@ -64,8 +64,8 @@ def novo_paciente(request):
             return redirect('notification:novo_notificacao')
     else:
         form = PacienteRegisterForm()
-    ubs_mapa = get_list_or_404(Estabelecimento)
-    lista_notificacoes = get_list_or_404(Notificacao)
+    ubs_mapa = Estabelecimento.objects.all()
+    lista_notificacoes = Notificacao.objects.all()
     flag_agravo = True
     agravos_mapa = []
     for i in lista_notificacoes:

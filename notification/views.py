@@ -61,6 +61,7 @@ def novo_notificacao(request):
                 notificacao.usuario = user
                 notificacao.paciente = paciente_notificacao
                 notificacao.save()
+                notificacao_form.save_m2m()
                 del request.session['paciente_cns']
                 messages.success(
                     request, f'{user.nome}, notificação realizada com sucesso!')
@@ -70,13 +71,14 @@ def novo_notificacao(request):
                 user = request.user
                 notificacao.usuario = user
                 notificacao.save()
+                notificacao_form.save_m2m()
                 messages.success(
                     request, f'{user.nome}, notificação realizada com sucesso!')
                 return redirect('notification:notificacao_list')
     else:
         notificacao_form = NotificacaoForm()  
     lista_ubs = Estabelecimento.objects.all()
-    lista_notificacoes = get_list_or_404(Notificacao)
+    lista_notificacoes = Notificacao.objects.all()
     flag_agravo = True
     agravos_mapa = []
     for i in lista_notificacoes:

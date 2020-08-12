@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth import authenticate, get_user_model
 from .models import *
+from django.forms import CheckboxSelectMultiple
 
 
 class DateInput(forms.DateInput):
@@ -20,7 +21,9 @@ class NotificacaoForm(forms.ModelForm):
             'doencas_pre_existentes': "Doenças Preexistentes"
         }
         widgets = {
-            'data_primeiros_sintomas': DateInput()
+            'data_primeiros_sintomas': DateInput(),
+            'sinais_clinicos': CheckboxSelectMultiple(),
+            'doencas_pre_existentes': CheckboxSelectMultiple(),
         }
 
     def clean(self, *args, **kwargs):
