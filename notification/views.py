@@ -4,6 +4,8 @@ from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django.http import JsonResponse
+from django.forms.models import model_to_dict
 from .forms import *
 import os
 
@@ -28,26 +30,28 @@ def notificacao_list(request):
         notificacao = get_object_or_404(Notificacao, id=request.POST['notificacao_valor'])
         notificacao.situacao_atual = request.POST['situacao_notificacao']
         notificacao.save()
-    notificacoes = gerenciar_paginacao(request, Notificacao.objects.filter(usuario=request.user).order_by('agravo'))
-    lista_notificacoes = Notificacao.objects.all()
-    if (notificacoes):
-        agravos_mapa = []
-        if(lista_notificacoes):
-            flag_agravo = True
-            for i in lista_notificacoes:
-                for j in agravos_mapa:
-                    if j == i.agravo:
-                        flag_agravo = False
-                if flag_agravo:
-                    agravos_mapa.append(i.agravo)
-                flag_agravo = True
-        context = {
-            'notificacoes': notificacoes,
-            'agravos_mapa': agravos_mapa
-        }
+        return JsonResponse({'situacao_atual':notificacao.situacao_atual}, status=200)
     else:
-        context = {}
-    return render(request, "notification/notificacao_list.html", context)
+        notificacoes = gerenciar_paginacao(request, Notificacao.objects.filter(usuario=request.user).order_by('agravo'))
+        lista_notificacoes = Notificacao.objects.all()
+        if (notificacoes):
+            agravos_mapa = []
+            if(lista_notificacoes):
+                flag_agravo = True
+                for i in lista_notificacoes:
+                    for j in agravos_mapa:
+                        if j == i.agravo:
+                            flag_agravo = False
+                    if flag_agravo:
+                        agravos_mapa.append(i.agravo)
+                    flag_agravo = True
+            context = {
+                'notificacoes': notificacoes,
+                'agravos_mapa': agravos_mapa
+            }
+        else:
+            context = {}
+        return render(request, "notification/notificacao_list.html", context)
 
 @login_required
 def novo_notificacao(request):

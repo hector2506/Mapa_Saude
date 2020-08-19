@@ -47,7 +47,7 @@ class="nav-item"
     <div class="jumbotron mx-auto" style="max-width:75%; max-height:75%; margin:50px;">
         {% if notificacoes %}
         <div style=" overflow-y : scroll; height: 300px;">
-            <table class="table table-bordered">
+            <table class="table table-bordered" id="tabelaNotificacao" data-url="{% url 'notification:notificacao_list' %}">
                 <thead>
                     <tr>
                         <th>Agravo</th>
@@ -63,7 +63,7 @@ class="nav-item"
                         <td>{{i.agravo}}</td>
                         <td>{{i.paciente}}</td>
                         <td>{{i.unidade_saude}}</td>
-                        <td>{{i.situacao_atual}}</td>
+                        <td id="SituacaoAtual" data-id="{{ i.id }}">{{i.situacao_atual}}</td>
                         <td>
                             <form action="{% url 'notification:notificacao_list' %}" method="POST">
                                 {% csrf_token %}
@@ -83,7 +83,7 @@ class="nav-item"
                                             <!-- Modal body -->
                                             <div class="modal-body">
 
-                                                <select class="form-control" id="situacao_notificacao"
+                                                <select class="form-control" id="situacao_notificacao{{ i.id }}"
                                                     name="situacao_notificacao">
                                                     <option>Notificado</option>
                                                     <option>Confirmado</option>
@@ -96,8 +96,8 @@ class="nav-item"
                                             <div class="modal-footer">
                                                 <div class="btn-group" role="group" aria-label="Basic example"
                                                     style="margin: 0 auto">
-                                                    <button type="submit" class="btn btn-primary"
-                                                        name="notificacao_valor" id="ButtonModal" value="{{i.id}}">
+                                                    <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                                        name="notificacao_valor" id="ButtonModal" data-id="{{i.id}}" value="{{i.id}}">
                                                         Avançar
                                                     </button>
 
@@ -156,6 +156,29 @@ class="nav-item"
         </div>
     </div>
 </div>
+<script>
+    var csrfToken = $("input[name=csrfmiddlewaretoken]").val()
+    $("#tabelaNotificacao").on('click','#ButtonModal',function(){
+        event.preventDefault();
+        var dataId = $(this).data('id')
+        console.log(dataId)
+        $.ajax({
+            url: $("#tabelaNotificacao").data('url'),
+            data: {
+                csrfmiddlewaretoken: csrfToken,
+                id: dataId,
+                notificacao_valor: dataId,
+                situacao_notificacao: $('#situacao_notificacao' + dataId).val(),
+            },
+            type: 'post',
+            success: function(response){
+                var situacaoAtual = $('#SituacaoAtual[data-id="' + dataId + '"]')
+                situacaoAtual.html(response.situacao_atual)
+                console.log(situacaoAtual.html())
+            }
+        })
+    })
+</script>
 {% endblock %}
 
 </html>
