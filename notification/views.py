@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
+from django.core import serializers
 from .forms import *
 import os
 
@@ -106,3 +107,10 @@ def novo_notificacao(request):
             'agravos_mapa': agravos_mapa,
         }
     return render(request, 'notification/novo_notificacao.html', context)
+
+@login_required
+def descobre_agravo(request):
+    agravo = get_object_or_404(Agravo, id=request.POST['id_agravo'])
+    sinais_clinicos = agravo.sinais_clinicos.all().values()
+    doencas_pre_existentes = agravo.doencas_pre_existentes.all().values()
+    return JsonResponse({'sinais_clinicos':list(sinais_clinicos), 'doencas_pre_existentes':list(doencas_pre_existentes)}, status=200)

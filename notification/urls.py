@@ -8,4 +8,5 @@ app_name = "notification"
 urlpatterns = [
     path('lista_notificacao/',notificacao_list, name='notificacao_list'),
     path('novo_notificacao/',novo_notificacao, name='novo_notificacao'),
+    path('descobre_agravo/',descobre_agravo, name='descobre_agravo'),
 ]

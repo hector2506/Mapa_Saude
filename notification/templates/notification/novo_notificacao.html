@@ -63,7 +63,8 @@ class="nav-item"
 
 {% block body %}
 <div style="text-align: center;">
-  <div class="jumbotron mx-auto" style="width:75%; height:75%; margin:50px;">
+  <div class="jumbotron mx-auto" style="width:75%; height:75%; margin:50px;" id="jumbotronNotificacao"
+    data-url="{% url 'notification:descobre_agravo' %}">
     <form action="" method='POST'>
       {% csrf_token %}
       <!--Form para notificação-->
@@ -91,7 +92,17 @@ class="nav-item"
           {% endfor %}
         </select>
         {% else %}
+        {% if field.name == 'sinais_clinicos' %}
+        <ul id="id_sinais_clinicos">
+        </ul>
+        {% else %}
+        {% if field.name == 'doencas_pre_existentes' %}
+        <ul id="id_doencas_pre_existentes">
+        </ul>
+        {% else %}
         {{field}}
+        {% endif %}
+        {% endif %}
         {% endif %}
         {% endif %}
         <!-- Aqui são mensagens de ajuda -->
@@ -117,4 +128,28 @@ class="nav-item"
     </form>
   </div>
 </div>
+<script>
+  var csrfToken = $("input[name=csrfmiddlewaretoken]").val()
+  $('#id_agravo').change(function () {
+    var dataId = $(this).val()
+    $.ajax({
+      url: $("#jumbotronNotificacao").data('url'),
+      data: {
+        csrfmiddlewaretoken: csrfToken,
+        id_agravo: dataId,
+      },
+      type: 'post',
+      success: function (response) {
+        $("#id_sinais_clinicos").empty()
+        $("#id_doencas_pre_existentes").empty()
+        for (i = 0; i < response.sinais_clinicos.length; i++) {
+          $("#id_sinais_clinicos").append('<li><label for="id_sinais_clinicos_'+ i +'"><input type="checkbox" name="sinais_clinicos" value="'+ response.sinais_clinicos[i].id +'" id="id_sinais_clinicos_'+ i +'"> '+ response.sinais_clinicos[i].nome +'</label></li>');
+        }
+        for (i = 0; i < response.doencas_pre_existentes.length; i++) {
+          $("#id_doencas_pre_existentes").append('<li><label for="id_doencas_pre_existentes_'+ i +'"><input type="checkbox" name="doencas_pre_existentes" value="'+ response.doencas_pre_existentes[i].id +'" id="id_doencas_pre_existentes_'+ i +'"> '+ response.doencas_pre_existentes[i].nome +'</label></li>');
+        }
+      }
+    })
+  })
+</script>
 {% endblock %}

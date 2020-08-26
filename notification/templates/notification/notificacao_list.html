@@ -161,12 +161,10 @@ class="nav-item"
     $("#tabelaNotificacao").on('click','#ButtonModal',function(){
         event.preventDefault();
         var dataId = $(this).data('id')
-        console.log(dataId)
         $.ajax({
             url: $("#tabelaNotificacao").data('url'),
             data: {
                 csrfmiddlewaretoken: csrfToken,
-                id: dataId,
                 notificacao_valor: dataId,
                 situacao_notificacao: $('#situacao_notificacao' + dataId).val(),
             },
@@ -174,7 +172,6 @@ class="nav-item"
             success: function(response){
                 var situacaoAtual = $('#SituacaoAtual[data-id="' + dataId + '"]')
                 situacaoAtual.html(response.situacao_atual)
-                console.log(situacaoAtual.html())
             }
         })
     })
