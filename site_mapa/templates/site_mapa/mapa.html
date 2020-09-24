@@ -297,6 +297,7 @@ class="nav-item active"
         markers.push(marker)
     }
 
+    // Função para exibir ou ocultar os pontos no mapa que são Notificados
     function notificado() {
         if (flagnotificado == 0) {
             for (i = 0; i < markers.length; i++) {
@@ -317,6 +318,8 @@ class="nav-item active"
             document.getElementById("texto_notificado").style.opacity = "1";
         }
     }
+
+    // Função para exibir ou ocultar os pontos no mapa que são Confirmados
     function confirmado() {
         if (flagConfirmado == 0) {
             for (i = 0; i < markers.length; i++) {
@@ -337,6 +340,8 @@ class="nav-item active"
             document.getElementById("texto_confirmado").style.opacity = "1";
         }
     }
+
+    // Função para exibir ou ocultar os pontos no mapa que são Curados 
     function cura() {
         if (flagCura == 0) {
             for (i = 0; i < markers.length; i++) {
@@ -357,6 +362,8 @@ class="nav-item active"
             document.getElementById("texto_cura").style.opacity = "1";
         }
     }
+    
+    // Função para exibir ou ocultar os pontos no mapa que são Notificados
     function obito() {
         if (flagObito == 0) {
             for (i = 0; i < markers.length; i++) {
