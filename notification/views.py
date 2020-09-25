@@ -4,6 +4,9 @@ from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django.http import JsonResponse
+from django.forms.models import model_to_dict
+from django.core import serializers
 from .forms import *
 import os
 
@@ -28,26 +31,28 @@ def notificacao_list(request):
         notificacao = get_object_or_404(Notificacao, id=request.POST['notificacao_valor'])
         notificacao.situacao_atual = request.POST['situacao_notificacao']
         notificacao.save()
-    notificacoes = gerenciar_paginacao(request, Notificacao.objects.filter(usuario=request.user).order_by('agravo'))
-    lista_notificacoes = Notificacao.objects.all()
-    if (notificacoes):
-        agravos_mapa = []
-        if(lista_notificacoes):
-            flag_agravo = True
-            for i in lista_notificacoes:
-                for j in agravos_mapa:
-                    if j == i.agravo:
-                        flag_agravo = False
-                if flag_agravo:
-                    agravos_mapa.append(i.agravo)
-                flag_agravo = True
-        context = {
-            'notificacoes': notificacoes,
-            'agravos_mapa': agravos_mapa
-        }
+        return JsonResponse({'situacao_atual':notificacao.situacao_atual}, status=200)
     else:
-        context = {}
-    return render(request, "notification/notificacao_list.html", context)
+        notificacoes = gerenciar_paginacao(request, Notificacao.objects.filter(usuario=request.user).order_by('agravo'))
+        lista_notificacoes = Notificacao.objects.all()
+        if (notificacoes):
+            agravos_mapa = []
+            if(lista_notificacoes):
+                flag_agravo = True
+                for i in lista_notificacoes:
+                    for j in agravos_mapa:
+                        if j == i.agravo:
+                            flag_agravo = False
+                    if flag_agravo:
+                        agravos_mapa.append(i.agravo)
+                    flag_agravo = True
+            context = {
+                'notificacoes': notificacoes,
+                'agravos_mapa': agravos_mapa
+            }
+        else:
+            context = {}
+        return render(request, "notification/notificacao_list.html", context)
 
 @login_required
 def novo_notificacao(request):
@@ -61,6 +66,7 @@ def novo_notificacao(request):
                 notificacao.usuario = user
                 notificacao.paciente = paciente_notificacao
                 notificacao.save()
+                notificacao_form.save_m2m()
                 del request.session['paciente_cns']
                 messages.success(
                     request, f'{user.nome}, notificação realizada com sucesso!')
@@ -70,13 +76,14 @@ def novo_notificacao(request):
                 user = request.user
                 notificacao.usuario = user
                 notificacao.save()
+                notificacao_form.save_m2m()
                 messages.success(
                     request, f'{user.nome}, notificação realizada com sucesso!')
                 return redirect('notification:notificacao_list')
     else:
         notificacao_form = NotificacaoForm()  
     lista_ubs = Estabelecimento.objects.all()
-    lista_notificacoes = get_list_or_404(Notificacao)
+    lista_notificacoes = Notificacao.objects.all()
     flag_agravo = True
     agravos_mapa = []
     for i in lista_notificacoes:
@@ -100,3 +107,10 @@ def novo_notificacao(request):
             'agravos_mapa': agravos_mapa,
         }
     return render(request, 'notification/novo_notificacao.html', context)
+
+@login_required
+def descobre_agravo(request):
+    agravo = get_object_or_404(Agravo, id=request.POST['id_agravo'])
+    sinais_clinicos = agravo.sinais_clinicos.all().values()
+    doencas_pre_existentes = agravo.doencas_pre_existentes.all().values()
+    return JsonResponse({'sinais_clinicos':list(sinais_clinicos), 'doencas_pre_existentes':list(doencas_pre_existentes)}, status=200)

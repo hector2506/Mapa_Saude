@@ -47,7 +47,8 @@ class="nav-item"
     <div class="jumbotron mx-auto" style="max-width:75%; max-height:75%; margin:50px;">
         {% if notificacoes %}
         <div style=" overflow-y : scroll; height: 300px;">
-            <table class="table table-bordered">
+            <table class="table table-bordered" id="tabelaNotificacao"
+                data-url="{% url 'notification:notificacao_list' %}">
                 <thead>
                     <tr>
                         <th>Agravo</th>
@@ -63,51 +64,49 @@ class="nav-item"
                         <td>{{i.agravo}}</td>
                         <td>{{i.paciente}}</td>
                         <td>{{i.unidade_saude}}</td>
-                        <td>{{i.situacao_atual}}</td>
+                        <td id="SituacaoAtual" data-id="{{ i.id }}">{{i.situacao_atual}}</td>
                         <td>
-                            <form action="{% url 'notification:notificacao_list' %}" method="POST">
-                                {% csrf_token %}
-                                <button type="button" class="btn btn-primary" id="notificacao_valor" data-toggle="modal"
-                                    data-target="#notificacao{{i.id}}">Alterar Situação</button>
-                                <div class="modal fade" id="notificacao{{i.id}}">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
+                            {% csrf_token %}
+                            <button type="button" class="btn btn-primary" id="notificacao_valor" data-toggle="modal"
+                                data-target="#notificacao{{i.id}}">Alterar Situação</button>
+                            <div class="modal fade" id="notificacao{{i.id}}">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
 
-                                            <!-- Modal Header -->
-                                            <div class="modal-header">
-                                                <h4 class="modal-title">Selecione a nova situação da notificação:</h4>
-                                                <button type="button" class="close"
-                                                    data-dismiss="modal">&times;</button>
-                                            </div>
-
-                                            <!-- Modal body -->
-                                            <div class="modal-body">
-
-                                                <select class="form-control" id="situacao_notificacao"
-                                                    name="situacao_notificacao">
-                                                    <option>Notificado</option>
-                                                    <option>Confirmado</option>
-                                                    <option>Alta</option>
-                                                    <option>Óbito</option>
-                                                </select>
-                                            </div>
-
-                                            <!-- Modal footer -->
-                                            <div class="modal-footer">
-                                                <div class="btn-group" role="group" aria-label="Basic example"
-                                                    style="margin: 0 auto">
-                                                    <button type="submit" class="btn btn-primary"
-                                                        name="notificacao_valor" id="ButtonModal" value="{{i.id}}">
-                                                        Avançar
-                                                    </button>
-
-                                                </div>
-                                            </div>
-
+                                        <!-- Modal Header -->
+                                        <div class="modal-header">
+                                            <h4 class="modal-title">Selecione a nova situação da notificação:</h4>
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
                                         </div>
+
+                                        <!-- Modal body -->
+                                        <div class="modal-body">
+
+                                            <select class="form-control" id="situacao_notificacao{{ i.id }}"
+                                                name="situacao_notificacao">
+                                                <option>Notificado</option>
+                                                <option>Confirmado</option>
+                                                <option>Alta</option>
+                                                <option>Óbito</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Modal footer -->
+                                        <div class="modal-footer">
+                                            <div class="btn-group" role="group" aria-label="Basic example"
+                                                style="margin: 0 auto">
+                                                <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                                    name="notificacao_valor" id="ButtonModal" data-id="{{i.id}}"
+                                                    value="{{i.id}}">
+                                                    Avançar
+                                                </button>
+
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
-                            </form>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -156,6 +155,26 @@ class="nav-item"
         </div>
     </div>
 </div>
+<script>
+    var csrfToken = $("input[name=csrfmiddlewaretoken]").val()
+    $("#tabelaNotificacao").on('click', '#ButtonModal', function () {
+        event.preventDefault();
+        var dataId = $(this).data('id')
+        $.ajax({
+            url: $("#tabelaNotificacao").data('url'),
+            data: {
+                csrfmiddlewaretoken: csrfToken,
+                notificacao_valor: dataId,
+                situacao_notificacao: $('#situacao_notificacao' + dataId).val(),
+            },
+            type: 'post',
+            success: function (response) {
+                var situacaoAtual = $('#SituacaoAtual[data-id="' + dataId + '"]')
+                situacaoAtual.html(response.situacao_atual)
+            }
+        })
+    })
+</script>
 {% endblock %}
 
 </html>

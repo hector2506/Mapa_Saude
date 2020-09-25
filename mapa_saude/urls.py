@@ -6,7 +6,7 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/',include('accounts.urls')),
-    path('notification',include('notification.urls')),
+    path('notification/',include('notification.urls')),
     path('patient/',include('patient.urls')),
     path('site-mapa/',include('site_mapa.urls'))
 ]
