@@ -13,19 +13,12 @@ def mapa(request):
     env = os.environ
     GOOGLE_API_KEY = env.get('GOOGLE_API_KEY')
     nome_agravo = request.POST['agravo_notificacao']
-    agravo_notificacao = get_object_or_404(Agravo, nome=nome_agravo)
+    agravo_notificacao = Agravo.objects.get(nome=nome_agravo)
     notificacoes_mapa = Notificacao.objects.filter(agravo=agravo_notificacao)
-    lista_notificacoes = get_list_or_404(Notificacao)
+    lista_notificacoes = Notificacao.objects.all()
     ubs_mapa = get_list_or_404(Estabelecimento)
     flag_agravo = True
-    agravos_mapa = []
-    for i in lista_notificacoes:
-        for j in agravos_mapa:
-            if j == i.agravo:
-                flag_agravo = False
-        if flag_agravo:
-            agravos_mapa.append(i.agravo)
-        flag_agravo = True
+    agravos_mapa = Agravo.objects.all()
     context = {
         'nome_agravo': nome_agravo,
         'notificacoes_mapa': notificacoes_mapa,

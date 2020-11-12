@@ -28,24 +28,14 @@ def gerenciar_paginacao(request, object_list):
 def paciente_list(request):
     pacientes = gerenciar_paginacao(request, Paciente.objects.filter(
         ubs=request.user.vinculo).order_by('nome'))
-    lista_notificacoes = Notificacao.objects.all()
+    agravos_mapa = Agravo.objects.all()
     if (pacientes):
-        agravos_mapa = []
-        if (lista_notificacoes):
-            flag_agravo = True
-            for i in lista_notificacoes:
-                for j in agravos_mapa:
-                    if j == i.agravo:
-                        flag_agravo = False
-                if flag_agravo:
-                    agravos_mapa.append(i.agravo)
-                flag_agravo = True
         context = {
             'pacientes': pacientes,
             'agravos_mapa': agravos_mapa
         }
     else:
-        context = {}
+        context = {'agravos_mapa': agravos_mapa}
     return render(request, "patient/home.html", context)
 
 
@@ -65,16 +55,7 @@ def novo_paciente(request):
     else:
         form = PacienteRegisterForm()
     ubs_mapa = Estabelecimento.objects.all()
-    lista_notificacoes = Notificacao.objects.all()
-    flag_agravo = True
-    agravos_mapa = []
-    for i in lista_notificacoes:
-        for j in agravos_mapa:
-            if j == i.agravo:
-                flag_agravo = False
-        if flag_agravo:
-            agravos_mapa.append(i.agravo)
-        flag_agravo = True
+    agravos_mapa = Agravo.objects.all()
     env = os.environ
     GOOGLE_API_KEY = env.get('GOOGLE_API_KEY')
     context = {

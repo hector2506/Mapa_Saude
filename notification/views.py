@@ -34,24 +34,14 @@ def notificacao_list(request):
         return JsonResponse({'situacao_atual':notificacao.situacao_atual}, status=200)
     else:
         notificacoes = gerenciar_paginacao(request, Notificacao.objects.filter(usuario=request.user).order_by('agravo'))
-        lista_notificacoes = Notificacao.objects.all()
+        agravos_mapa = Agravo.objects.all()
         if (notificacoes):
-            agravos_mapa = []
-            if(lista_notificacoes):
-                flag_agravo = True
-                for i in lista_notificacoes:
-                    for j in agravos_mapa:
-                        if j == i.agravo:
-                            flag_agravo = False
-                    if flag_agravo:
-                        agravos_mapa.append(i.agravo)
-                    flag_agravo = True
             context = {
                 'notificacoes': notificacoes,
                 'agravos_mapa': agravos_mapa
             }
         else:
-            context = {}
+            context = {'agravos_mapa': agravos_mapa}
         return render(request, "notification/notificacao_list.html", context)
 
 @login_required
@@ -83,16 +73,7 @@ def novo_notificacao(request):
     else:
         notificacao_form = NotificacaoForm()  
     lista_ubs = Estabelecimento.objects.all()
-    lista_notificacoes = Notificacao.objects.all()
-    flag_agravo = True
-    agravos_mapa = []
-    for i in lista_notificacoes:
-        for j in agravos_mapa:
-            if j == i.agravo:
-                flag_agravo = False
-        if flag_agravo:
-            agravos_mapa.append(i.agravo)
-        flag_agravo = True
+    agravos_mapa = Agravo.objects.all()
     if(request.session.get('paciente_cns')):
         context = {
             'notificacao_form': notificacao_form,
