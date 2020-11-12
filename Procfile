@@ -1,1 +1,1 @@
-web: gunicorn mapa-saude.wsgi
+web: gunicorn mapa_saude.wsgi
