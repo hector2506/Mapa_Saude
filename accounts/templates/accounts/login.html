@@ -6,12 +6,10 @@
 #ButtonCadastro {
 padding: 10px 20px;
 font-size: 20px;
-margin: 5px;
-min-width: 150px;
-}
-
-#linkCadastro {
-color: white;
+margin: 3px;
+min-width: 20%;
+max-width: 100%;
+overflow: hidden;
 }
 
 .input-group-prepend {
@@ -22,6 +20,7 @@ min-width: 25%;
 .input-group-prepend span {
 width: 100%;
 overflow: hidden;
+background-color: lavender;
 }
 
 input {
@@ -30,10 +29,6 @@ min-width: 75%;
 
 label {
 font-weight: bold;
-}
-
-.input-group-text {
-background-color: lavender;
 }
 
 form {
@@ -47,7 +42,7 @@ display: inline;
 
 {% block body %}
 <img src="{% static 'assets/imagem.png' %}" class="mx-auto d-block img-fluid" style="width:30%; height:30%">
-<div class="jumbotron mx-auto" style="max-width:30%; max-height:30%; text-align: center;">
+<div class="jumbotron mx-auto" style="width:40%; text-align: center;">
   <form action="{% url 'accounts:login' %}" method='POST'>
     {% csrf_token %}
 

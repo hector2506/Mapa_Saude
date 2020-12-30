@@ -7,12 +7,10 @@
 #ButtonAnterior {
 padding: 10px 20px;
 font-size: 20px;
-margin: 5px;
-min-width: 150px;
-}
-
-#linkCadastro {
-color: white;
+margin: 3px;
+min-width: 10%;
+max-width: 100%;
+overflow: hidden;
 }
 
 .input-group-prepend {
@@ -23,6 +21,7 @@ min-width: 25%;
 .input-group-prepend span {
 width: 100%;
 overflow: hidden;
+background-color: lavender;
 }
 
 input,
@@ -34,20 +33,9 @@ label {
 font-weight: bold;
 }
 
-.input-group-text {
-background-color: lavender;
-}
-
 #map {
 height: 90%;
 border: 1px solid black;
-}
-
-/* Optional: Makes the sample page fill the window. */
-html,
-body {
-height: 100%;
-padding: 0;
 }
 
 #description {
@@ -93,7 +81,7 @@ margin-top: 12px;
 margin-left: 12px;
 padding: 0 11px 0 13px;
 text-overflow: ellipsis;
-width: 400px;
+width: 100%;
 }
 
 #input_map:focus {
@@ -108,9 +96,14 @@ font-weight: 500;
 padding: 6px 12px;
 }
 
-.span-button {
-margin
+.select2-container .select2-selection--single {
+  height: 100% !important;
 }
+
+.select2 {
+  min-width: 75%!important;
+}
+
 {% endblock %}
 
 {% block title %}
@@ -169,12 +162,12 @@ class="nav-item"
         {% endfor %}
         {{form.latitude}}
         {{form.longitude}}
-        <button type="submit" id="ButtonFinalizar" class="btn btn-success btn-lg d-inline float-right"
+        <button type="submit" id="ButtonFinalizar" class="btn btn-success btn-lg float-right"
           style="visibility:hidden">
           Finalizar
         </button>
       </form>
-      <button type="submit" class="btn btn-primary btn-lg d-inline float-left" onclick="proximo()" id="ButtonProximo">
+      <button type="submit" class="btn btn-primary btn-lg float-left" onclick="proximo()" id="ButtonProximo">
         Avançar
       </button>
   </div>
@@ -199,15 +192,19 @@ class="nav-item"
     <span id="place-name" class="title"></span><br>
     <span id="place-address"></span>
   </div>
-  <button onclick="anterior()" class="btn btn-primary btn-lg float-left" style="margin-top: 2em;" id="ButtonAnterior">
+  <button onclick="anterior()" class="btn btn-primary btn-lg float-left" id="ButtonAnterior">
     Anterior
   </button>
-  <button onclick="finalizar()" id="finalizar" class="btn btn-success btn-lg float-right" style="margin-top: 2em;">
+  <button onclick="finalizar()" id="finalizar" class="btn btn-success btn-lg float-right">
     Finalizar
   </button>
 </div>
 
 <script>
+  
+  $(document).ready(function() {
+    $('#id_uf').select2();
+  });
 
   var map;
   var service;
@@ -372,6 +369,7 @@ class="nav-item"
   function proximo() {
     document.getElementById('1').className = "d-none"
     document.getElementById('2').className = "jumbotron mx-auto"
+    document.body.style.height = "100%"
   }
 
   function anterior() {
@@ -380,6 +378,7 @@ class="nav-item"
     if ($("#id_longitude").val() != "") {
       document.getElementById("ButtonFinalizar").style.visibility = "visible"
     }
+    document.body.style.height = ""
   }
 
   function finalizar() {

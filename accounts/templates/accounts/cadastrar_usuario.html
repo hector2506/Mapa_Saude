@@ -1,16 +1,13 @@
 {% extends 'core/base.html' %}
 
 {% block style %}
-#ButtonLogin,
 #ButtonCadastro {
 padding: 10px 20px;
 font-size: 20px;
-margin: 5px;
-min-width: 150px;
-}
-
-#linkCadastro {
-color: white;
+margin: 3px;
+min-width: 20%;
+max-width: 100%;
+overflow: hidden;
 }
 
 .input-group-prepend {
@@ -21,10 +18,10 @@ min-width: 25%;
 .input-group-prepend span {
 width: 100%;
 overflow: hidden;
+background-color: lavender;
 }
 
-input,
-select {
+input {
 min-width: 75%;
 }
 
@@ -32,9 +29,14 @@ label {
 font-weight: bold;
 }
 
-.input-group-text {
-background-color: lavender;
+.select2-container .select2-selection--single {
+  height: 100% !important;
 }
+
+.select2 {
+  min-width: 75%!important;
+}
+
 {% endblock %}
 
 {% block title %}
@@ -42,7 +44,7 @@ background-color: lavender;
 {% endblock %}
 
 {% block body %}
-<div class="jumbotron mx-auto" style="width:75%; height:75%; margin:50px; text-align: center;">
+<div class="jumbotron mx-auto" style="width:75%; margin:50px; text-align: center;">
   <form action="" method='POST'>
     {% csrf_token %}
 
@@ -77,6 +79,11 @@ background-color: lavender;
     </button>
   </form>
 </div>
+<script>
+  $(document).ready(function() {
+    $('select').select2();
+  });
+</script>
 {% endblock %}
 
 </html>
