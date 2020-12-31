@@ -26,8 +26,7 @@ def gerenciar_paginacao(request, object_list):
 
 @login_required
 def paciente_list(request):
-    pacientes = gerenciar_paginacao(request, Paciente.objects.filter(
-        ubs=request.user.vinculo).order_by('nome'))
+    pacientes = Paciente.objects.filter(ubs=request.user.vinculo).order_by('nome')
     agravos_mapa = Agravo.objects.all()
     if (pacientes):
         context = {

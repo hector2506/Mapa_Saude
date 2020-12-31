@@ -50,14 +50,14 @@ class="nav-item"
 {% endblock %}
 
 {% block body %}
-<div class="jumbotron mx-auto" style="max-width:75%; max-height:75%; margin:50px; text-align: center;">
+<div class="jumbotron mx-auto" style="width:75%; margin:50px;">
     {% if notificacoes %}
-    <div style="overflow: auto; height: 300px;">
-        <table class="table table-bordered" id="tabelaNotificacao" data-url="{% url 'notification:notificacao_list' %}">
+    <div id="tabelaLink" data-url="{% url 'notification:notificacao_list' %}">
+        <table id="tabelaNotificacao" class="table table-bordered table-hover">
             <thead>
                 <tr>
-                    <th>Agravo</th>
                     <th>Paciente</th>
+                    <th>Agravo</th>
                     <th>UBS</th>
                     <th>Situação Atual</th>
                     <th>Opções</th>
@@ -66,10 +66,10 @@ class="nav-item"
             <tbody>
                 {% for i in notificacoes %}
                 <tr>
-                    <td>{{i.agravo}}</td>
                     <td>{{i.paciente}}</td>
+                    <td>{{i.agravo}}</td>
                     <td>{{i.unidade_saude}}</td>
-                    <td id="SituacaoAtual" data-id="{{ i.id }}">{{i.situacao_atual}}</td>
+                    <td id="SituacaoAtual{{i.id}}">{{i.situacao_atual}}</td>
                     <td>
                         {% csrf_token %}
                         <button type="button" class="btn btn-primary" id="notificacao_valor" data-toggle="modal"
@@ -118,52 +118,73 @@ class="nav-item"
             </tbody>
         </table>
     </div>
-    <ul class="pagination" style="margin: 10px 0;">
-        {% if notificacoes.has_previous %}
-        <li class="page-item"><a class="page-link" title="Primeira página" href="?page=1">
-                <i class="fa fa-fast-backward" style="padding: 2px;"></i></a>
-        </li>
-        <li class="page-item"><a class="page-link" title="Página Anterior"
-                href="?page={{notificacoes.previous_page_number}}">
-                <i class="fa fa-backward" style="padding: 2px;"></i></a>
-        </li>
-        {% endif %}
-        {% for i in notificacoes.paginator.page_range %}
-        <li class="page-item {% if notificacoes.number == i %} active {% endif %}"><a class="page-link"
-                href="?page={{i}}">{{i}}</a></li>
-        {% endfor %}
-        {% if notificacoes.has_next %}
-        <li class="page-item"><a class="page-link" title="Próxima página"
-                href="?page={{notificacoes.next_page_number}}">
-                <i class="fa fa-forward" style="padding: 2px;"></i></a>
-        </li>
-        <li class="page-item"><a class="page-link" title="Útima página"
-                href="?page={{ notificacoes.paginator.num_pages }}">
-                <i class="fa fa-fast-forward" style="padding: 2px;"></i></a>
-        </li>
-        {% endif %}
-    </ul>
     {% endif %}
-    <form action="{% url 'notification:novo_notificacao' %}" method="GET">
-        <button type="submit" id="ButtonAgravo" class="btn btn-warning btn-lg">
-            <div id="linkCadastro">Notificar Agravo</div>
+    <div style="text-align: center;">
+        <form action="{% url 'notification:novo_notificacao' %}" method="GET">
+            <button type="submit" id="ButtonAgravo" class="btn btn-warning btn-lg">
+                <div id="linkCadastro">Notificar Agravo</div>
+            </button>
+        </form>
+        <form action="{% url 'patient:home' %}" method="GET">
+            <button type="submit" id="ButtonPaciente" class="btn btn-primary btn-lg">
+                Pacientes
+            </button>
+        </form>
+        <button type="button" class="btn btn-info btn-lg" id="ButtonMapa"
+        data-toggle="modal" data-target="#modal_mapa">
+        Consultar o Mapa
         </button>
-    </form>
-    <form action="{% url 'patient:home' %}" method="GET">
-        <button type="submit" id="ButtonPaciente" class="btn btn-primary btn-lg">
-            Pacientes
-        </button>
-    </form>
-    <button type="button" class="btn btn-info btn-lg" id="ButtonMapa" data-toggle="modal"
-        data-target="#modal_mapa">Consultar o Mapa</button>
+    </div>
 </div>
 <script>
+    $(document).ready(function () {
+        var language = {
+            "decimal":        "",
+            "emptyTable":     "Tabela vazia",
+            "info":           "Exibindo _START_ até _END_ de _TOTAL_ linhas",
+            "infoEmpty":      "Exibindo 0 até 0 de 0 linhas",
+            "infoFiltered":   "",
+            "infoPostFix":    "",
+            "thousands":      ",",
+            "lengthMenu":     "Exibindo _MENU_ registros",
+            "loadingRecords": "Carregando...",
+            "processing":     "Processando...",
+            "search":         "Pesquisar:",
+            "zeroRecords":    "Nenhum registro encontrado",
+            "paginate": {
+                "first":      '<i class="fa fa-fast-backward" style="padding: 2px;"></i>',
+                "last":       '<i class="fa fa-fast-forward" style="padding: 2px;"></i>',
+                "next":       '<i class="fa fa-forward" style="padding: 2px;"></i>',
+                "previous":   '<i class="fa fa-backward" style="padding: 2px;"></i>'
+            },
+            "aria": {
+                "sortAscending":  ": activate to sort column ascending",
+                "sortDescending": ": activate to sort column descending"
+            }
+        }
+        $('#tabelaNotificacao').DataTable({
+            responsive: true,
+            scrollY: '35vh',
+            scrollCollapse: true,
+            'language': language,
+            'lengthMenu': [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "Tudo"] ],
+            'pagingType': "full_numbers",
+            "columnDefs": [
+                { "orderable": false, "targets": 4 },
+                { "searchable": false, "targets": 4 }
+            ],
+            rowReorder: {
+                selector: 'td:nth-child(2)'
+            },
+        })
+    })
+
     var csrfToken = $("input[name=csrfmiddlewaretoken]").val()
     $("#tabelaNotificacao").on('click', '#ButtonModal', function () {
         event.preventDefault();
         var dataId = $(this).data('id')
         $.ajax({
-            url: $("#tabelaNotificacao").data('url'),
+            url: $("#tabelaLink").data('url'),
             data: {
                 csrfmiddlewaretoken: csrfToken,
                 notificacao_valor: dataId,
@@ -171,8 +192,7 @@ class="nav-item"
             },
             type: 'post',
             success: function (response) {
-                var situacaoAtual = $('#SituacaoAtual[data-id="' + dataId + '"]')
-                situacaoAtual.html(response.situacao_atual)
+                document.getElementById("SituacaoAtual" + dataId).innerHTML = response.situacao_atual;
             }
         })
     })

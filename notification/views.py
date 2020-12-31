@@ -31,9 +31,11 @@ def notificacao_list(request):
         notificacao = get_object_or_404(Notificacao, id=request.POST['notificacao_valor'])
         notificacao.situacao_atual = request.POST['situacao_notificacao']
         notificacao.save()
+        notificacoes = Notificacao.objects.filter(usuario=request.user).order_by('agravo')
+        agravos_mapa = Agravo.objects.all()
         return JsonResponse({'situacao_atual':notificacao.situacao_atual}, status=200)
     else:
-        notificacoes = gerenciar_paginacao(request, Notificacao.objects.filter(usuario=request.user).order_by('agravo'))
+        notificacoes = Notificacao.objects.filter(usuario=request.user).order_by('agravo')
         agravos_mapa = Agravo.objects.all()
         if (notificacoes):
             context = {
