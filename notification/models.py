@@ -18,7 +18,7 @@ class DoencasPreExistentes(models.Model):
         return self.nome
 
 class Agravo(models.Model):
-    nome = models.CharField(max_length=255) 
+    nome = models.CharField(max_length=255)
     sinais_clinicos = models.ManyToManyField(SinaisClinicos, related_name="agravo_sinais", blank=True, default=None)
     doencas_pre_existentes = models.ManyToManyField(DoencasPreExistentes, related_name="agravo_doencas", blank=True, default=None)
 

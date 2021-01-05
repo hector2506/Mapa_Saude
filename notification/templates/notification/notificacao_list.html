@@ -50,7 +50,7 @@ class="nav-item"
 {% endblock %}
 
 {% block body %}
-<div class="jumbotron mx-auto" style="width:75%; margin:50px;">
+<div class="jumbotron mx-auto" style="width:85%; margin:50px;">
     {% if notificacoes %}
     <div>
         <table id="tabelaNotificacao" class="table table-bordered table-hover">
@@ -63,59 +63,23 @@ class="nav-item"
                     <th>Opções</th>
                 </tr>
             </thead>
+            <!--
             <tbody>
                 {% for i in notificacoes %}
                 <tr>
                     <td>{{i.paciente}}</td>
                     <td>{{i.agravo}}</td>
                     <td>{{i.unidade_saude}}</td>
-                    <td id="SituacaoAtual{{i.id}}">{{i.situacao_atual}}</td>
+                    <td>{{i.situacao_atual}}</td>
                     <td>
                         {% csrf_token %}
-                        <button type="button" class="btn btn-primary" id="ButtonAlterar" data-toggle="modal"
-                            data-target="#notificacao{{i.id}}" value="#ButtonModal{{i.id}}">Alterar Situação</button>
+                        <button type="button" class="btn btn-primary buttonalterar" id="" data-toggle="modal"
+                            data-target="#notificacaoModal" value="{{i.id}}" situacao="{{i.situacao_atual}}">Alterar Situação</button>
                     </td>
                 </tr>
-                <div class="modal fade" id="notificacao{{i.id}}">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-
-                            <!-- Modal Header -->
-                            <div class="modal-header">
-                                <h4 class="modal-title">Selecione a nova situação da notificação:</h4>
-                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            </div>
-
-                            <!-- Modal body -->
-                            <div class="modal-body">
-
-                                <select class="form-control" id="situacao_notificacao{{ i.id }}"
-                                    name="situacao_notificacao">
-                                    <option>Notificado</option>
-                                    <option>Confirmado</option>
-                                    <option>Alta</option>
-                                    <option>Óbito</option>
-                                </select>
-                            </div>
-
-                            <!-- Modal footer -->
-                            <div class="modal-footer">
-                                <div class="btn-group" role="group" aria-label="Basic example"
-                                    style="margin: 0 auto">
-                                    <button type="button" class="btn btn-primary" data-dismiss="modal"
-                                        name="ButtonModal" id="ButtonModal{{i.id}}" data-id="{{i.id}}"
-                                        value="{{i.id}}">
-                                        Avançar
-                                    </button>
-
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
                 {% endfor %}
             </tbody>
+            -->
         </table>
     </div>
     {% endif %}
@@ -129,15 +93,56 @@ class="nav-item"
             <button type="submit" id="ButtonPaciente" class="btn btn-primary btn-lg">
                 Pacientes
             </button>
+            <input type="hidden" id="valorLinha"/>
         </form>
         <button type="button" class="btn btn-info btn-lg" id="ButtonMapa"
         data-toggle="modal" data-target="#modal_mapa">
         Consultar o Mapa
         </button>
     </div>
+    <div class="modal fade" id="notificacaoModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Selecione a nova situação da notificação:</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+
+                    <select class="form-control" id="situacao_notificacao"
+                        name="situacao_notificacao">
+                        <option name="Notificado">Notificado</option>
+                        <option name="Confirmado">Confirmado</option>
+                        <option name="Alta">Alta</option>
+                        <option name="Óbito">Óbito</option>
+                    </select>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <div class="btn-group" role="group" aria-label="Basic example"
+                        style="margin: 0 auto">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                            name="ButtonModal" id="ButtonModal" data-id=""
+                            value="">
+                            Avançar
+                        </button>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
 <script>
     $(document).ready(function () {
+        const notificacoes = {{ notificacoes | safe}}
+        console.log(notificacoes)
         var language = {
             "decimal":        "",
             "emptyTable":     "Tabela vazia",
@@ -163,6 +168,19 @@ class="nav-item"
             }
         }
         $('#tabelaNotificacao').DataTable({
+            data: notificacoes,
+            columns:[
+                { "data": "paciente" },
+                { "data": "agravo" },
+                { "data": "unidade_saude" },
+                { "data": "situacao_atual"},
+                {  render: function(data, type, row) {
+                        return (
+                            `<button type="button" class="btn btn-primary buttonalterar" data-toggle="modal" 
+                            data-target="#notificacaoModal" value="${row.id}" situacao="${row.situacao_atual}">
+                            Alterar Situação</button>`
+                        ) }}
+            ],
             scrollY: '35vh',
             scrollCollapse: true,
             'language': language,
@@ -172,27 +190,41 @@ class="nav-item"
                 { "orderable": false, "targets": 4 },
                 { "searchable": false, "targets": 4 }
             ],
+            responsive: true,
         })
     })
-
+    function atualizaSituacao(situacao){
+        $("#situacao_notificacao").children().each(function(){
+            if ($(this).attr('name') == situacao){
+                $(this).prop('selected',"selected")
+            }
+            else{
+                $(this).removeProp('selected')
+            }
+        })
+    }
     var csrfToken = $("input[name=csrfmiddlewaretoken]").val()
-    $("#tabelaNotificacao").on('click', '#ButtonAlterar', function () {
-        var buttonModal = $(this).val()
-        $(buttonModal).on('click',function(){
-            event.preventDefault();
-            var dataId = $(this).data('id')
-            $.ajax({
-                url: "{% url 'notification:notificacao_list' %}",
-                data: {
-                    csrfmiddlewaretoken: csrfToken,
-                    notificacao_valor: dataId,
-                    situacao_notificacao: $('#situacao_notificacao' + dataId).val(),
-                },
-                type: 'post',
-                success: function (response) {
-                    document.getElementById("SituacaoAtual" + dataId).innerHTML = response.situacao_atual;
-                }
-            })
+    $('.buttonalterar').on('click', function () {
+        $("#valorLinha").attr("value", $(this).attr('value'))
+        var situacao = $(this).attr('situacao')
+        atualizaSituacao(situacao)
+    })
+    $('#ButtonModal').on('click',function(){
+        event.preventDefault();
+        var dataId = $("#valorLinha").attr('value')
+        $.ajax({
+            url: "{% url 'notification:notificacao_list' %}",
+            data: {
+                csrfmiddlewaretoken: csrfToken,
+                notificacao_valor: dataId,
+                situacao_notificacao: $('#situacao_notificacao').val(),
+            },
+            type: 'post',
+            success: function (response) {
+                table = $('#tabelaNotificacao').DataTable();
+                table.clear()
+                table.rows.add(response.data).draw()
+            }
         })
     })
 </script>

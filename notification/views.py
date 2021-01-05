@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.forms.models import model_to_dict
 from django.core import serializers
 from .forms import *
+import json
 import os
 
 def gerenciar_paginacao(request, object_list):
@@ -32,14 +33,33 @@ def notificacao_list(request):
         notificacao.situacao_atual = request.POST['situacao_notificacao']
         notificacao.save()
         notificacoes = Notificacao.objects.filter(usuario=request.user).order_by('agravo')
-        agravos_mapa = Agravo.objects.all()
-        return JsonResponse({'situacao_atual':notificacao.situacao_atual}, status=200)
+        lista_notificacoes = []
+        for notificacao in notificacoes:
+            aux = {
+                "id":notificacao.id,
+                "paciente":notificacao.paciente.nome,
+                "agravo":notificacao.agravo.nome,
+                "unidade_saude":notificacao.unidade_saude.nome,
+                "situacao_atual":notificacao.situacao_atual,
+            }
+            lista_notificacoes.append(aux)
+        return JsonResponse(json.dumps(lista_notificacoes), status=200)
     else:
         notificacoes = Notificacao.objects.filter(usuario=request.user).order_by('agravo')
         agravos_mapa = Agravo.objects.all()
         if (notificacoes):
+            lista_notificacoes = []
+            for notificacao in notificacoes:
+                aux = {
+                    "id":notificacao.id,
+                    "paciente":notificacao.paciente.nome,
+                    "agravo":notificacao.agravo.nome,
+                    "unidade_saude":notificacao.unidade_saude.nome,
+                    "situacao_atual":notificacao.situacao_atual,
+                }
+                lista_notificacoes.append(aux)
             context = {
-                'notificacoes': notificacoes,
+                'notificacoes': lista_notificacoes,
                 'agravos_mapa': agravos_mapa
             }
         else:
