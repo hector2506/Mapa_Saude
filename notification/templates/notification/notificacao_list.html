@@ -209,7 +209,6 @@ class="nav-item"
     $(document).on('click',".buttonalterar" , function () {
         $("#valorLinha").attr("value", $(this).attr('value'))
         var situacao = $(this).attr('situacao')
-        console.log(situacao)
         atualizaSituacao(situacao)
     })
 
@@ -226,10 +225,9 @@ class="nav-item"
             },
             type: 'post',
             success: function (response) {
-                console.log(response)
                 table = $('#tabelaNotificacao').DataTable();
                 table.clear()
-                table.rows.add(response).draw()
+                table.rows.add(response).draw(false)
             }
         })
     })
