@@ -142,7 +142,6 @@ class="nav-item"
 <script>
     $(document).ready(function () {
         const notificacoes = {{ notificacoes | safe}}
-        console.log(notificacoes)
         var language = {
             "decimal":        "",
             "emptyTable":     "Tabela vazia",
@@ -174,12 +173,14 @@ class="nav-item"
                 { "data": "agravo" },
                 { "data": "unidade_saude" },
                 { "data": "situacao_atual"},
-                {  render: function(data, type, row) {
+                { "data": "id", "render": function(data, type, row) {
                         return (
                             `<button type="button" class="btn btn-primary buttonalterar" data-toggle="modal" 
                             data-target="#notificacaoModal" value="${row.id}" situacao="${row.situacao_atual}">
                             Alterar Situação</button>`
-                        ) }}
+                        ) 
+                    }
+                }
             ],
             scrollY: '35vh',
             scrollCollapse: true,
@@ -193,6 +194,7 @@ class="nav-item"
             responsive: true,
         })
     })
+
     function atualizaSituacao(situacao){
         $("#situacao_notificacao").children().each(function(){
             if ($(this).attr('name') == situacao){
@@ -203,14 +205,17 @@ class="nav-item"
             }
         })
     }
-    var csrfToken = $("input[name=csrfmiddlewaretoken]").val()
-    $('.buttonalterar').on('click', function () {
+    
+    $(document).on('click',".buttonalterar" , function () {
         $("#valorLinha").attr("value", $(this).attr('value'))
         var situacao = $(this).attr('situacao')
+        console.log(situacao)
         atualizaSituacao(situacao)
     })
+
     $('#ButtonModal').on('click',function(){
-        event.preventDefault();
+        var csrfToken = $("input[name=csrfmiddlewaretoken]").val()
+        event.preventDefault()
         var dataId = $("#valorLinha").attr('value')
         $.ajax({
             url: "{% url 'notification:notificacao_list' %}",
@@ -221,9 +226,10 @@ class="nav-item"
             },
             type: 'post',
             success: function (response) {
+                console.log(response)
                 table = $('#tabelaNotificacao').DataTable();
                 table.clear()
-                table.rows.add(response.data).draw()
+                table.rows.add(response).draw()
             }
         })
     })

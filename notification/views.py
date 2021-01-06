@@ -43,7 +43,7 @@ def notificacao_list(request):
                 "situacao_atual":notificacao.situacao_atual,
             }
             lista_notificacoes.append(aux)
-        return JsonResponse(json.dumps(lista_notificacoes), status=200)
+        return JsonResponse(json.dumps(lista_notificacoes), safe=False, status=200)
     else:
         notificacoes = Notificacao.objects.filter(usuario=request.user).order_by('agravo')
         agravos_mapa = Agravo.objects.all()
