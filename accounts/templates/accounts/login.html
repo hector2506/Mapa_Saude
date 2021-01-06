@@ -42,7 +42,7 @@ display: inline;
 
 {% block body %}
 <img src="{% static 'assets/imagem.png' %}" class="mx-auto d-block img-fluid" style="width:30%; height:30%">
-<div class="jumbotron mx-auto" style="width:40%; text-align: center;">
+<div class="jumbotron mx-auto" style="width:50%; text-align: center;">
   <form action="{% url 'accounts:login' %}" method='POST'>
     {% csrf_token %}
 

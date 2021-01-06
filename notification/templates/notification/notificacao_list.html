@@ -50,7 +50,7 @@ class="nav-item"
 {% endblock %}
 
 {% block body %}
-<div class="jumbotron mx-auto" style="width:85%; margin:50px;">
+<div class="jumbotron mx-auto" style="width:85%; margin:3%;">
     {% if notificacoes %}
     <div>
         <table id="tabelaNotificacao" class="table table-bordered table-hover">
@@ -63,23 +63,6 @@ class="nav-item"
                     <th>Opções</th>
                 </tr>
             </thead>
-            <!--
-            <tbody>
-                {% for i in notificacoes %}
-                <tr>
-                    <td>{{i.paciente}}</td>
-                    <td>{{i.agravo}}</td>
-                    <td>{{i.unidade_saude}}</td>
-                    <td>{{i.situacao_atual}}</td>
-                    <td>
-                        {% csrf_token %}
-                        <button type="button" class="btn btn-primary buttonalterar" id="" data-toggle="modal"
-                            data-target="#notificacaoModal" value="{{i.id}}" situacao="{{i.situacao_atual}}">Alterar Situação</button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-            -->
         </table>
     </div>
     {% endif %}
@@ -142,7 +125,6 @@ class="nav-item"
 <script>
     $(document).ready(function () {
         const notificacoes = {{ notificacoes | safe}}
-        console.log(notificacoes)
         var language = {
             "decimal":        "",
             "emptyTable":     "Tabela vazia",
@@ -173,13 +155,15 @@ class="nav-item"
                 { "data": "paciente" },
                 { "data": "agravo" },
                 { "data": "unidade_saude" },
-                { "data": "situacao_atual"},
-                {  render: function(data, type, row) {
+                { "data": "situacao_atual" },
+                { "data": "id", "render": function(data, type, row) {
                         return (
                             `<button type="button" class="btn btn-primary buttonalterar" data-toggle="modal" 
                             data-target="#notificacaoModal" value="${row.id}" situacao="${row.situacao_atual}">
                             Alterar Situação</button>`
-                        ) }}
+                        ) 
+                    }
+                }
             ],
             scrollY: '35vh',
             scrollCollapse: true,
@@ -193,6 +177,7 @@ class="nav-item"
             responsive: true,
         })
     })
+
     function atualizaSituacao(situacao){
         $("#situacao_notificacao").children().each(function(){
             if ($(this).attr('name') == situacao){
@@ -203,14 +188,16 @@ class="nav-item"
             }
         })
     }
-    var csrfToken = $("input[name=csrfmiddlewaretoken]").val()
-    $('.buttonalterar').on('click', function () {
+    
+    $(document).on('click',".buttonalterar" , function () {
         $("#valorLinha").attr("value", $(this).attr('value'))
         var situacao = $(this).attr('situacao')
         atualizaSituacao(situacao)
     })
+
     $('#ButtonModal').on('click',function(){
-        event.preventDefault();
+        var csrfToken = $("input[name=csrfmiddlewaretoken]").val()
+        event.preventDefault()
         var dataId = $("#valorLinha").attr('value')
         $.ajax({
             url: "{% url 'notification:notificacao_list' %}",
@@ -223,7 +210,7 @@ class="nav-item"
             success: function (response) {
                 table = $('#tabelaNotificacao').DataTable();
                 table.clear()
-                table.rows.add(response.data).draw()
+                table.rows.add(response).draw(false)
             }
         })
     })
