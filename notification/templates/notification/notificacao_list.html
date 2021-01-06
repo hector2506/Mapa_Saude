@@ -50,7 +50,7 @@ class="nav-item"
 {% endblock %}
 
 {% block body %}
-<div class="jumbotron mx-auto" style="width:85%; margin:50px;">
+<div class="jumbotron mx-auto" style="width:85%; margin:3%;">
     {% if notificacoes %}
     <div>
         <table id="tabelaNotificacao" class="table table-bordered table-hover">
@@ -63,23 +63,6 @@ class="nav-item"
                     <th>Opções</th>
                 </tr>
             </thead>
-            <!--
-            <tbody>
-                {% for i in notificacoes %}
-                <tr>
-                    <td>{{i.paciente}}</td>
-                    <td>{{i.agravo}}</td>
-                    <td>{{i.unidade_saude}}</td>
-                    <td>{{i.situacao_atual}}</td>
-                    <td>
-                        {% csrf_token %}
-                        <button type="button" class="btn btn-primary buttonalterar" id="" data-toggle="modal"
-                            data-target="#notificacaoModal" value="{{i.id}}" situacao="{{i.situacao_atual}}">Alterar Situação</button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-            -->
         </table>
     </div>
     {% endif %}
@@ -172,7 +155,7 @@ class="nav-item"
                 { "data": "paciente" },
                 { "data": "agravo" },
                 { "data": "unidade_saude" },
-                { "data": "situacao_atual"},
+                { "data": "situacao_atual" },
                 { "data": "id", "render": function(data, type, row) {
                         return (
                             `<button type="button" class="btn btn-primary buttonalterar" data-toggle="modal" 

@@ -66,8 +66,7 @@ class="nav-item"
 
 {% block body %}
 <div style="text-align: center;">
-  <div class="jumbotron mx-auto" style="width:75%; margin:50px;" id="jumbotronNotificacao"
-    data-url="{% url 'notification:descobre_agravo' %}">
+  <div class="jumbotron mx-auto" style="width:85%; margin:3%;">
     <form action="" method='POST'>
       {% csrf_token %}
       <!--Form para notificação-->
@@ -141,7 +140,7 @@ class="nav-item"
   $('#id_agravo').change(function () {
     var dataId = $(this).val()
     $.ajax({
-      url: $("#jumbotronNotificacao").data('url'),
+      url: "{% url 'notification:descobre_agravo' %}",
       data: {
         csrfmiddlewaretoken: csrfToken,
         id_agravo: dataId,
