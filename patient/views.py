@@ -33,7 +33,6 @@ def paciente_list(request):
         lista_pacientes = []
         for paciente in pacientes:
             data_nascimento = '{}/{}/{}'.format(paciente.data_nascimento.strftime("%d"),paciente.data_nascimento.strftime("%m"),paciente.data_nascimento.strftime("%Y"))
-            print(data_nascimento)
             aux = {
                 "nome":paciente.nome,
                 "cns":paciente.cns,
@@ -50,7 +49,6 @@ def paciente_list(request):
         }
     else:
         context = {'agravos_mapa': agravos_mapa}
-    print(lista_pacientes)
     return render(request, "patient/home.html", context)
 
 
