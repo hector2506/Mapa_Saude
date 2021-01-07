@@ -32,12 +32,11 @@ def paciente_list(request):
     if (pacientes):
         lista_pacientes = []
         for paciente in pacientes:
-            data_nascimento = '{}/{}/{}'.format(paciente.data_nascimento.strftime("%d"),paciente.data_nascimento.strftime("%m"),paciente.data_nascimento.strftime("%Y"))
             aux = {
                 "nome":paciente.nome,
                 "cns":paciente.cns,
                 "sexo":paciente.sexo,
-                "data_nascimento":data_nascimento,
+                "data_nascimento":str(paciente.data_nascimento.strftime('%d/%m/%Y')),
                 "ocupacao":paciente.ocupacao,
                 "uf":paciente.uf,
                 "municipio":paciente.municipio,
