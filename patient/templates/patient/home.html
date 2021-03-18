@@ -1,0 +1,131 @@
+{% extends 'core/base.html' %}
+{% load staticfiles%}
+
+{% block style %}
+#ButtonMapa,
+#ButtonAgravo,
+#ButtonPaciente {
+padding: 10px 20px;
+font-size: 20px;
+margin: 3px;
+min-width: 10%;
+max-width: 100%;
+overflow: hidden;
+}
+
+table {
+background-color: white;
+}
+
+form {
+display: inline;
+}
+
+{% endblock %}
+
+{% block title %}
+<title>Lista dos Pacientes da UBS</title>
+{% endblock %}
+
+{% block navbar %}
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'patient:home' %}">Home</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'notification:notificacao_list' %}">Notificações</a>
+</li>
+{% endblock %}
+{% block mapa_active %}
+class="nav-item"
+{% endblock %}
+
+{% block body %}
+<div class="jumbotron mx-auto" style="width:85%; margin:3%;">
+    {% if pacientes %}
+    <table id="tabelaPaciente" class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>CNS</th>
+                <th>Sexo</th>
+                <th>Data de nascimento</th>
+                <th>Ocupação</th>
+                <th>UF</th>
+                <th>Município</th>
+            </tr>
+        </thead>
+    </table>
+    {% endif %}
+    <div style="text-align: center;">
+        <form action="{% url 'patient:novo_paciente' %}" method="GET">
+            <button type="submit" id="ButtonPaciente" class="btn btn-primary btn-lg">
+                Cadastrar Paciente
+            </button>
+        </form>
+        <form action="{% url 'notification:notificacao_list' %}" method="GET">
+            <button type="submit" id="ButtonAgravo" class="btn btn-warning btn-lg">
+                <div style="color:white;">Notificações</div>
+            </button>
+        </form>
+        <button type="button" class="btn btn-info btn-lg" id="ButtonMapa" 
+        data-toggle="modal" data-target="#modal_mapa">
+            Consultar o Mapa
+        </button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        const pacientes = {{ pacientes | safe}}
+        var language = {
+            "decimal":        "",
+            "emptyTable":     "Tabela vazia",
+            "info":           "Exibindo _START_ até _END_ de _TOTAL_ linhas",
+            "infoEmpty":      "Exibindo 0 até 0 de 0 linhas",
+            "infoFiltered":   "",
+            "infoPostFix":    "",
+            "thousands":      ",",
+            "lengthMenu":     "Exibindo _MENU_ registros",
+            "loadingRecords": "Carregando...",
+            "processing":     "Processando...",
+            "search":         "Pesquisar:",
+            "zeroRecords":    "Nenhum registro encontrado",
+            "paginate": {
+                "first":      '<i class="fa fa-fast-backward" style="padding: 2px;"></i>',
+                "last":       '<i class="fa fa-fast-forward" style="padding: 2px;"></i>',
+                "next":       '<i class="fa fa-forward" style="padding: 2px;"></i>',
+                "previous":   '<i class="fa fa-backward" style="padding: 2px;"></i>'
+            },
+            "aria": {
+                "sortAscending":  ": activate to sort column ascending",
+                "sortDescending": ": activate to sort column descending"
+            }
+        }
+        moment.locale('pt-br');
+        $.fn.dataTable.moment( 'L', 'pt-br' );
+        $('#tabelaPaciente').DataTable({
+            data: pacientes,
+            columns:[
+                { "data": "nome" },
+                { "data": "cns" },
+                { "data": "sexo" },
+                { "data": "data_nascimento", "render": function(data, type, row) {
+                        return (
+                            `<td data-sort="YYYYMMDD">${row.data_nascimento}</td>`
+                        ) 
+                    } },
+                { "data": "ocupacao" },
+                { "data": "uf" },
+                { "data": "municipio" },
+            ],
+            scrollY: '35vh',
+            scrollCollapse: true,
+            'language': language,
+            'lengthMenu': [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "Tudo"] ],
+            'pagingType': "full_numbers",
+            responsive: true,
+        })
+    })
+</script>
+{% endblock %}
+
+</html>

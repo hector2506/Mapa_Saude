@@ -1,0 +1,389 @@
+{% extends 'core/base.html' %}
+{% block style %}
+html,
+body {
+height: 100%;
+}
+
+#map {
+width: 85%;
+height: 75%;
+margin: 3%;
+}
+
+.box {
+float: left;
+height: 17px;
+width: 17px;
+margin-bottom: 10px;
+margin-left: 5px;
+margin-right: 5px;
+border: 1px solid black;
+clear: both;
+}
+
+.yellow {
+background-color: #FFFF00;
+}
+
+.red {
+background-color: #FF0000;
+}
+
+.blue {
+background-color: #0000FF;
+}
+
+.purple {
+background-color: #800080;
+}
+{% endblock %}
+
+{%block title %}
+<title>Consulta ao Mapa</title>
+{% endblock %}
+
+{% block navbar %}
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'patient:home' %}">Home</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'notification:notificacao_list' %}">Notificações</a>
+</li>
+{% endblock %}
+{% block mapa_active %}
+class="nav-item active"
+{% endblock %}
+
+{% block body %}
+<div id="selecaoagravo" style="text-align: left;">
+    <form class="form-inline" action="{% url 'site_mapa:mapa' %}" method="POST">
+        {% csrf_token %}
+        <select class="form-control" id="agravo_notificacao" name="agravo_notificacao"
+            style="max-width: 75%; display: inline-block;">
+            {% for j in agravos_mapa %}
+            {% if j.nome == nome_agravo %}
+            <option selected>{{j.nome}}</option>
+            {% else %}
+            <option>{{j.nome}}</option>
+            {% endif %}
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary" name="notificacao_valor" id="ButtonModal"
+            style="display: inline-block;">
+            Recarregar
+        </button>
+    </form>
+</div>
+<div id="map" class="mx-auto"></div>
+<div id="helptext" style="background-color:#e9ecef; padding: 20px; border: 1px solid; font-size: 14px;">
+    <h6>Legenda:</h6>
+    <div style="display: inline-block;">
+        <div id="caixa_notificado" class='box yellow' onclick="notificado()"></div>
+        <div id="texto_notificado" style="display: inline;" onclick="notificado()">Caso Notificado</div>
+    </div>
+    <br>
+    <div style="display: inline-block;">
+        <div id="caixa_confirmado" class='box red' onclick="confirmado()"></div>
+        <div id="texto_confirmado" style="display: inline;" onclick="confirmado()">Caso Confirmado</div>
+    </div>
+    <br>
+    <div style="display: inline-block;">
+        <div id="caixa_cura" class='box blue' onclick="cura()"></div>
+        <div id="texto_cura" style="display: inline;" onclick="cura()">Cura</div>
+    </div>
+    <br>
+    <div style="display: inline-block;">
+        <div id="caixa_obito" class='box purple' onclick="obito()"></div>
+        <div id="texto_obito" style="display: inline;" onclick="obito()">Óbito</div>
+    </div>
+</div>
+<script>
+    var markers = [] // array para armazenar os pontos marcados no mapa
+    var flagnotificado = 0 // variável para controlar o filtro dos casos notificados
+    var flagConfirmado = 0 // variável para controlar o filtro dos casos confirmados
+    var flagCura = 0 // variável para controlar o filtro das curas
+    var flagObito = 0 // variável para controlar o filtro dos óbitos
+
+    function initMap() {
+
+        //Cria o mapa inicial
+        var map = new google.maps.Map(document.getElementById('map'), {
+            center: {
+                lat: -5.0364390,
+                lng: -42.822612
+            },
+            zoom: 11,
+            mapTypeId: 'roadmap',
+            zoomControl: true,
+            mapTypeControl: false,
+            scaleControl: false,
+            streetViewControl: false,
+            rotateControl: false,
+            fullscreenControl: true
+        });
+        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById('helptext'));
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(document.getElementById('selecaoagravo'));
+        var infowindow = new google.maps.InfoWindow(); //Cria a janela de informação usada para a área da ubs
+        let coordenadasNotificacoes = [] //Array para receber as coordenadas de todas as notificações
+        let latitudeNotificacoes = [] // array que recebe a latitude das notificações
+        let longitudeNotificacoes = [] // array que recebe a longitude das notificações
+        let situacaoNotificacoes = [] //Array para armazenar a situação atual de todas as notificações
+        recebeCoordenadas(coordenadasNotificacoes, latitudeNotificacoes, longitudeNotificacoes, situacaoNotificacoes)
+        montaPoligonos(coordenadasNotificacoes, situacaoNotificacoes, infowindow, map)
+        for (i = 0; i < latitudeNotificacoes.length; i++) {
+            marcaPonto(latitudeNotificacoes[i], longitudeNotificacoes[i], situacaoNotificacoes[i], markers, map)
+        }
+    }
+
+    // Função para preencher um array strings das coordenadas de notificações vindas do banco e outro array com as situações atuais dessas notificações
+    function recebeCoordenadas(coordenadasNotificacoes, latitudeNotificacoes, longitudeNotificacoes, situacaoNotificacoes) {
+        // Preenche ambos arrays, coordenadasNotificacoes com as coordenadas e situacaoNotificacoes com a situação atual
+        {% for i in notificacoes_mapa %}
+        {% if i.situacao_atual == "Notificado" %}
+        situacaoNotificacoes.push(1)
+        {% endif %}
+        {% if i.situacao_atual == "Confirmado" %}
+        situacaoNotificacoes.push(2)
+        {% endif %}
+        {% if i.situacao_atual == "Alta" %}
+        situacaoNotificacoes.push(3)
+        {% endif %}
+        {% if i.situacao_atual == "Óbito" %}
+        situacaoNotificacoes.push(4)
+        {% endif %}
+        coordenadasNotificacoes.push("{{i.unidade_saude.coordenadas}}")
+        latitudeNotificacoes.push("{{i.paciente.latitude}}")
+        longitudeNotificacoes.push("{{i.paciente.longitude}}")
+        {% endfor %}
+    }
+
+    // Função que monta um array com longitude e latitude com base numa string com as coordenadas
+    function buildCoordinatesArrayFromString(CoordenadasString) {
+        var finalData = []; // Array com latitude e longitude 
+        var grouped = CoordenadasString.split("                 "); // Cria um array de substrings divididas a partir do espaço usando a função split()
+
+        // Função que é responsável por separar a latitude e a longitude e depois depositar cada instância no array finalData
+        grouped.forEach(function (item, i) { // percorre cada elemento do array grouped usando o forEach
+            let a = item.trim().split(','); // trim() serve para elimitar os espaços e o split serve para criar um array de substrings divididas a partir da vírgula, separando lat e lng
+            // coloca o novo elemento com lgn e lat no array de coordenadas
+            finalData.push({
+                lng: parseFloat(a[0]),
+                lat: parseFloat(a[1])
+            });
+        });
+
+        // Retorna o array com todas as coordenadas devidamente organizadas
+        return finalData;
+    }
+
+    function criaPoligono(path, cor) {
+        var ubs_poligono = new google.maps.Polygon({
+            paths: path,
+            strokeColor: cor,
+            strokeOpacity: 1.5,
+            strokeWeight: 2,
+            fillOpacity: 0
+        });
+        return ubs_poligono
+    }
+
+    // Função para criar e desenhar os poligonos no mapa
+    function montaPoligonos(coordenadasNotificacoes, situacaoNotificacoes, infowindow, mapa) {
+        let ubsCoordenadas = [] // array que recebe as coordenadas de todas as UBS do banco
+        let ubsNomes = [] // array que recebe os nomes de todas as UBS do banco
+        let notificado = [] // array para receber a quantidade de casos notificados na área de uma UBS
+        let confirmado = [] // array para receber a quantidade de casos confirmados na área de uma UBS
+        let alta = [] // array para receber a quantidade de altas na área de uma UBS
+        let obito = [] // array para receber a quantidade de obitos na área de uma UBS
+        let flag = 0 // flag para controlar o preenchimento do array coordenadasFinais
+
+        // loop para receber todas as coordenadas e nomes dos estabelecimentos presentes no banco
+        {% for g in ubs_mapa %}
+        ubsCoordenadas.push("{{g.coordenadas}}")
+        ubsNomes.push("{{g}}")
+        {% endfor %}
+
+        // loop para zerar todos os arrays necessários
+        for (let i = 0; i < ubsCoordenadas.length; i++) {
+            notificado[i] = 0
+            confirmado[i] = 0
+            obito[i] = 0
+            alta[i] = 0
+        }
+
+        // loop para contabilizar os casos de cada ubs e preencher o array coordenadasFinais com a área das UBS que possuem casos
+        for (let i = 0; i < coordenadasNotificacoes.length; i++) {
+            for (let j = 0; j < ubsCoordenadas.length; j++) {
+                if (coordenadasNotificacoes[i] == ubsCoordenadas[j]) {
+                    if (situacaoNotificacoes[i] == 1) {
+                        notificado[j]++
+                    }
+                    if (situacaoNotificacoes[i] == 2) {
+                        confirmado[j]++
+                    }
+                    if (situacaoNotificacoes[i] == 3) {
+                        alta[j]++
+                    }
+                    if (situacaoNotificacoes[i] == 4) {
+                        obito[j]++
+                    }
+                }
+            }
+        }
+
+        // loop para desenhar as áreas das UBS no mapa e preparar o evento caso o usuário clique na área 
+        for (let i in ubsCoordenadas) {
+            var ubs_poligono = criaPoligono(buildCoordinatesArrayFromString(ubsCoordenadas[i]), '#00cc00')
+
+            ubs_poligono.setMap(mapa);
+
+            // Evento para fechar a infowindow caso o usuário clique num lugar do mapa sem ser a área de alguma UBS
+            google.maps.event.addListener(mapa, 'click', function () {
+                infowindow.close();
+            });
+
+            // Evento para exibir a infowindow com o nome da UBS e a quantidade cada um dos tipos de notificações
+            ubs_poligono.addListener('click', function (event) {
+                var contentString = '<div id="content" style="text-align: center">' + "<h6>" + String(ubsNomes[i]) + "</h6>" + "Casos notificados: " +
+                    String(notificado[i]) + "<br><br>" + "Casos confirmados: " + String(confirmado[i]) + "<br><br>" +
+                    "Número de altas: " + String(alta[i]) + "<br><br>" + "Número de óbitos: " + String(obito[i]) + "<br><br>" + '</div>';
+                infowindow.setContent(contentString);
+                infowindow.setPosition(event.latLng);
+                infowindow.open(mapa);
+            });
+        }
+    }
+
+    // Função para marcar os pontos no mapa de acordo com as latitudes e longitudes recuperadas do banco
+    function marcaPonto(latitude, longitude, situacao, markers, mapa) {
+        pontoLatLng = { lat: parseFloat(latitude), lng: parseFloat(longitude) }
+        if (situacao == 1) {
+            var marker = new google.maps.Marker({
+                map: mapa,
+                position: pontoLatLng,
+                icon: {
+                    url: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"
+                }
+            });
+        }
+        if (situacao == 2) {
+            var marker = new google.maps.Marker({
+                map: mapa,
+                position: pontoLatLng,
+                icon: {
+                    url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                }
+            });
+        }
+        if (situacao == 3) {
+            var marker = new google.maps.Marker({
+                map: mapa,
+                position: pontoLatLng,
+                icon: {
+                    url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                }
+            });
+        }
+        if (situacao == 4) {
+            var marker = new google.maps.Marker({
+                map: mapa,
+                position: pontoLatLng,
+                icon: {
+                    url: "http://maps.google.com/mapfiles/ms/icons/purple-dot.png"
+                }
+            });
+        }
+        markers.push(marker)
+    }
+
+    // Função para exibir ou ocultar os pontos no mapa que são Notificados
+    function notificado() {
+        if (flagnotificado == 0) {
+            for (i = 0; i < markers.length; i++) {
+                if (markers[i].icon.url == "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png")
+                    markers[i].setVisible(false)
+            }
+            flagnotificado = 1
+            document.getElementById("caixa_notificado").style.opacity = "0.3";
+            document.getElementById("texto_notificado").style.opacity = "0.3";
+        }
+        else {
+            for (i = 0; i < markers.length; i++) {
+                if (markers[i].icon.url == "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png")
+                    markers[i].setVisible(true)
+            }
+            flagnotificado = 0
+            document.getElementById("caixa_notificado").style.opacity = "1";
+            document.getElementById("texto_notificado").style.opacity = "1";
+        }
+    }
+
+    // Função para exibir ou ocultar os pontos no mapa que são Confirmados
+    function confirmado() {
+        if (flagConfirmado == 0) {
+            for (i = 0; i < markers.length; i++) {
+                if (markers[i].icon.url == "http://maps.google.com/mapfiles/ms/icons/red-dot.png")
+                    markers[i].setVisible(false)
+            }
+            flagConfirmado = 1
+            document.getElementById("caixa_confirmado").style.opacity = "0.3";
+            document.getElementById("texto_confirmado").style.opacity = "0.3";
+        }
+        else {
+            for (i = 0; i < markers.length; i++) {
+                if (markers[i].icon.url == "http://maps.google.com/mapfiles/ms/icons/red-dot.png")
+                    markers[i].setVisible(true)
+            }
+            flagConfirmado = 0
+            document.getElementById("caixa_confirmado").style.opacity = "1";
+            document.getElementById("texto_confirmado").style.opacity = "1";
+        }
+    }
+
+    // Função para exibir ou ocultar os pontos no mapa que são Curados 
+    function cura() {
+        if (flagCura == 0) {
+            for (i = 0; i < markers.length; i++) {
+                if (markers[i].icon.url == "http://maps.google.com/mapfiles/ms/icons/blue-dot.png")
+                    markers[i].setVisible(false)
+            }
+            flagCura = 1
+            document.getElementById("caixa_cura").style.opacity = "0.3";
+            document.getElementById("texto_cura").style.opacity = "0.3";
+        }
+        else {
+            for (i = 0; i < markers.length; i++) {
+                if (markers[i].icon.url == "http://maps.google.com/mapfiles/ms/icons/blue-dot.png")
+                    markers[i].setVisible(true)
+            }
+            flagCura = 0
+            document.getElementById("caixa_cura").style.opacity = "1";
+            document.getElementById("texto_cura").style.opacity = "1";
+        }
+    }
+    
+    // Função para exibir ou ocultar os pontos no mapa que são Notificados
+    function obito() {
+        if (flagObito == 0) {
+            for (i = 0; i < markers.length; i++) {
+                if (markers[i].icon.url == "http://maps.google.com/mapfiles/ms/icons/purple-dot.png")
+                    markers[i].setVisible(false)
+            }
+            flagObito = 1
+            document.getElementById("caixa_obito").style.opacity = "0.3";
+            document.getElementById("texto_obito").style.opacity = "0.3";
+        }
+        else {
+            for (i = 0; i < markers.length; i++) {
+                if (markers[i].icon.url == "http://maps.google.com/mapfiles/ms/icons/purple-dot.png")
+                    markers[i].setVisible(true)
+            }
+            flagObito = 0
+            document.getElementById("caixa_obito").style.opacity = "1";
+            document.getElementById("texto_obito").style.opacity = "1";
+        }
+    }
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{google_api_key}}&callback=initMap" async defer></script>
+{% endblock %}

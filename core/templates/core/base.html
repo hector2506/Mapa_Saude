@@ -1,0 +1,169 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+  <!-- Popper JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <!-- Icons -->
+  <script src="https://use.fontawesome.com/be0366e24b.js"></script>
+
+  <!-- Select2 -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+  
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+
+  <!-- Data Table -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">
+
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.6/css/responsive.dataTables.min.css">
+  
+  <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
+
+  <script src="https://cdn.datatables.net/responsive/2.2.6/js/dataTables.responsive.min.js"></script>
+
+  <script src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>
+
+  <!-- Moment.js: -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+  
+  <!-- Brazilian locale file for moment.js-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/locale/pt-br.js"></script>
+  
+  <!-- Ultimate date sorting plug-in-->
+  <script src="https://cdn.datatables.net/plug-ins/1.10.22/sorting/datetime-moment.js"></script>
+
+  <style>
+    html {
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    body {
+      position: relative;
+      margin: 0;
+      padding-bottom: 6rem;
+      min-height: 100%;
+    }
+
+    footer {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background-color: whitesmoke;
+      color: white;
+      text-align: center;
+    }
+
+      {% block style %}
+
+      {% endblock %}
+  </style>
+  {% block title %}
+  {% endblock %}
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+    {% if user.is_authenticated %}
+    <a class="navbar-brand" href="{% url 'patient:home' %}">
+      <img src="{% static 'assets/logotipo.png' %}" width="35" height="35" class="d-inline-block align-top" alt="">
+      Mapa da Saúde
+    </a>
+    <div class="collapse navbar-collapse" id="navbarToggler">
+      <ul class="navbar-nav">
+        {% block navbar %}
+        {% endblock %}
+        <li {% block mapa_active %}{% endblock %}>
+          <a class="nav-link" href="" data-toggle="modal" data-target="#modal_mapa">Consultar o Mapa</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'patient:home' %}">
+            <i class="fa fa-user" aria-hidden="true"></i> {{user.nome}}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'accounts:logout' %}">
+            <i class="fa fa-sign-out" aria-hidden="true"></i>Sair
+          </a>
+        </li>
+      </ul>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler"
+      aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    {% else %}
+    <a class="navbar-brand" href="{% url 'accounts:login' %}">
+      <img src="{% static 'assets/logotipo.png' %}" width="35" height="35" class="d-inline-block align-top" alt="">
+      Mapa da Saúde
+    </a>
+    {% endif %}
+  </nav>
+  {% if messages %}
+  <div style="text-align: center;">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% block body%}
+  {% endblock %}
+  <footer>
+    <img src="{% static 'assets/imagem.png' %}" class="mx-auto d-block img-fluid" style="width:10%;">
+  </footer>
+  <div class="modal fade" id="modal_mapa">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Selecione o agravo:</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <form action="{% url 'site_mapa:mapa' %}" method="POST">
+          {% csrf_token %}
+
+          <!-- Modal body -->
+          <div class="modal-body">
+            <select class="form-control" id="agravo_notificacao" name="agravo_notificacao">
+              {% for j in agravos_mapa %}
+              <option>{{j.nome}}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <div class="btn-group" role="group" style="margin: 0 auto">
+              <button type="submit" class="btn btn-primary" name="notificacao_valor" id="ButtonModal" value="">
+                Consultar o Mapa
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,220 @@
+{% extends 'core/base.html' %}
+{% load staticfiles%}
+{% block style %}
+#ButtonMapa,
+#ButtonAgravo,
+#ButtonPaciente {
+padding: 10px 20px;
+font-size: 20px;
+margin: 3px;
+min-width: 10%;
+max-width: 100%;
+overflow: hidden;
+}
+
+#ButtonModal {
+padding: 10px 20px;
+font-size: 15px;
+margin: 10px;
+min-width: 25px;
+}
+
+#linkCadastro {
+color: white;
+}
+
+table {
+background-color: white;
+}
+
+form {
+display: inline;
+}
+
+{% endblock %}
+
+{% block title %}
+<title>Lista das Notificações</title>
+{% endblock %}
+
+{% block navbar %}
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'patient:home' %}">Home</a>
+</li>
+<li class="nav-item active">
+    <a class="nav-link" href="{% url 'notification:notificacao_list' %}">Notificações</a>
+</li>
+{% endblock %}
+{% block mapa_active %}
+class="nav-item"
+{% endblock %}
+
+{% block body %}
+<div class="jumbotron mx-auto" style="width:85%; margin:3%;">
+    {% if notificacoes %}
+    <div>
+        <table id="tabelaNotificacao" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Paciente</th>
+                    <th>Agravo</th>
+                    <th>UBS</th>
+                    <th>Situação Atual</th>
+                    <th>Opções</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+    {% endif %}
+    <div style="text-align: center;">
+        <form action="{% url 'notification:novo_notificacao' %}" method="GET">
+            <button type="submit" id="ButtonAgravo" class="btn btn-warning btn-lg">
+                <div id="linkCadastro">Notificar Agravo</div>
+            </button>
+        </form>
+        <form action="{% url 'patient:home' %}" method="GET">
+            <button type="submit" id="ButtonPaciente" class="btn btn-primary btn-lg">
+                Pacientes
+            </button>
+            <input type="hidden" id="valorLinha"/>
+        </form>
+        <button type="button" class="btn btn-info btn-lg" id="ButtonMapa"
+        data-toggle="modal" data-target="#modal_mapa">
+        Consultar o Mapa
+        </button>
+    </div>
+    <div class="modal fade" id="notificacaoModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Selecione a nova situação da notificação:</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+
+                    <select class="form-control" id="situacao_notificacao"
+                        name="situacao_notificacao">
+                        <option name="Notificado">Notificado</option>
+                        <option name="Confirmado">Confirmado</option>
+                        <option name="Alta">Alta</option>
+                        <option name="Óbito">Óbito</option>
+                    </select>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <div class="btn-group" role="group" aria-label="Basic example"
+                        style="margin: 0 auto">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                            name="ButtonModal" id="ButtonModal" data-id=""
+                            value="">
+                            Avançar
+                        </button>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        const notificacoes = {{ notificacoes | safe}}
+        var language = {
+            "decimal":        "",
+            "emptyTable":     "Tabela vazia",
+            "info":           "Exibindo _START_ até _END_ de _TOTAL_ linhas",
+            "infoEmpty":      "Exibindo 0 até 0 de 0 linhas",
+            "infoFiltered":   "",
+            "infoPostFix":    "",
+            "thousands":      ",",
+            "lengthMenu":     "Exibindo _MENU_ registros",
+            "loadingRecords": "Carregando...",
+            "processing":     "Processando...",
+            "search":         "Pesquisar:",
+            "zeroRecords":    "Nenhum registro encontrado",
+            "paginate": {
+                "first":      '<i class="fa fa-fast-backward" style="padding: 2px;"></i>',
+                "last":       '<i class="fa fa-fast-forward" style="padding: 2px;"></i>',
+                "next":       '<i class="fa fa-forward" style="padding: 2px;"></i>',
+                "previous":   '<i class="fa fa-backward" style="padding: 2px;"></i>'
+            },
+            "aria": {
+                "sortAscending":  ": activate to sort column ascending",
+                "sortDescending": ": activate to sort column descending"
+            }
+        }
+        $('#tabelaNotificacao').DataTable({
+            data: notificacoes,
+            columns:[
+                { "data": "paciente" },
+                { "data": "agravo" },
+                { "data": "unidade_saude" },
+                { "data": "situacao_atual" },
+                { "data": "id", "render": function(data, type, row) {
+                        return (
+                            `<button type="button" class="btn btn-primary buttonalterar" data-toggle="modal" 
+                            data-target="#notificacaoModal" value="${row.id}" situacao="${row.situacao_atual}">
+                            Alterar Situação</button>`
+                        ) 
+                    }
+                }
+            ],
+            scrollY: '35vh',
+            scrollCollapse: true,
+            'language': language,
+            'lengthMenu': [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "Tudo"] ],
+            'pagingType': "full_numbers",
+            "columnDefs": [
+                { "orderable": false, "targets": 4 },
+                { "searchable": false, "targets": 4 }
+            ],
+            responsive: true,
+        })
+    })
+
+    function atualizaSituacao(situacao){
+        $("#situacao_notificacao").children().each(function(){
+            if ($(this).attr('name') == situacao){
+                $(this).prop('selected',"selected")
+            }
+            else{
+                $(this).removeProp('selected')
+            }
+        })
+    }
+    
+    $(document).on('click',".buttonalterar" , function () {
+        $("#valorLinha").attr("value", $(this).attr('value'))
+        var situacao = $(this).attr('situacao')
+        atualizaSituacao(situacao)
+    })
+
+    $('#ButtonModal').on('click',function(){
+        var csrfToken = $("input[name=csrfmiddlewaretoken]").val()
+        event.preventDefault()
+        var dataId = $("#valorLinha").attr('value')
+        $.ajax({
+            url: "{% url 'notification:notificacao_list' %}",
+            data: {
+                csrfmiddlewaretoken: csrfToken,
+                notificacao_valor: dataId,
+                situacao_notificacao: $('#situacao_notificacao').val(),
+            },
+            type: 'post',
+            success: function (response) {
+                table = $('#tabelaNotificacao').DataTable();
+                table.clear()
+                table.rows.add(response).draw(false)
+            }
+        })
+    })
+</script>
+{% endblock %}
+
+</html>

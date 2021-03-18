@@ -1,5 +1,6 @@
 import environ
 import os
+import django_heroku
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,7 +18,7 @@ SECRET_KEY = env.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.get("DEBUG")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["https://mapa-saude.herokuapp.com/"]
 
 
 # Application definition
@@ -30,14 +31,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'site_mapa',
-    'multiselectfield'
+    'multiselectfield',
+    'accounts',
+    'core',
+    'notification',
+    'patient'
 ]
 
-AUTH_USER_MODEL = 'site_mapa.User'
+AUTH_USER_MODEL = 'accounts.User'
 
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'login'
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'patient:home'
+LOGOUT_REDIRECT_URL = 'accounts:login'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -118,3 +123,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+django_heroku.settings(locals())
